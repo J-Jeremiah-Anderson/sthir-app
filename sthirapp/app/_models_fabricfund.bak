@@ -1,0 +1,155 @@
+"""Six tables. Nothing speculative.
+
+The `events` table is append-only: every state change writes a row, so the
+entire demo can be replayed from a clean database in one command.
+"""
+import datetime as dt
+import uuid
+
+from sqlalchemy import (
+    Column, String, Float, Integer, DateTime, ForeignKey, Text, JSON, Index,
+)
+from sqlalchemy.orm import relationship
+
+from .db import Base
+
+
+def _id(prefix: str) -> str:
+    return f"{prefix}_{uuid.uuid4().hex[:10]}"
+
+
+def _now() -> dt.datetime:
+    return dt.datetime.now(dt.timezone.utc)
+
+
+class Mill(Base):
+    """An MSME borrower. Three are seeded; there is no signup flow."""
+    __tablename__ = "mills"
+
+    id = Column(String, primary_key=True, default=lambda: _id("mill"))
+    name = Column(String, nullable=False)
+    gstin = Column(String, nullable=False, unique=True)
+    town = Column(String, default="Tiruppur")
+    phone = Column(String)                      # WhatsApp identity
+    looms = Column(Integer, default=40)
+    cash_on_hand = Column(Float, default=0.0)
+    monthly_burn = Column(Float, default=0.0)   # total, denormalised for speed
+    burn_lines = Column(JSON, default=list)     # [{"head": "Yarn", "monthly": 300000}, ...]
+    created_at = Column(DateTime, default=_now)
+
+    invoices = relationship("Invoice", back_populates="mill")
+
+
+class Buyer(Base):
+    """The party that owes the money. Payment behaviour here is the single
+    most predictive feature in the decision engine."""
+    __tablename__ = "buyers"
+
+    id = Column(String, primary_key=True, default=lambda: _id("buyr"))
+    name = Column(String, nullable=False)
+    gstin = Column(String, nullable=False, unique=True)
+    turnover_band = Column(String, default="5-250cr")   # drives TReDS eligibility
+    invoices_settled = Column(Integer, default=0)
+    invoices_late = Column(Integer, default=0)
+    avg_days_late = Column(Float, default=0.0)
+    flagged_by_mills = Column(JSON, default=list)  # shared reputation signal
+    created_at = Column(DateTime, default=_now)
+
+    invoices = relationship("Invoice", back_populates="buyer")
+
+    @property
+    def on_time_rate(self) -> float:
+        total = self.invoices_settled + self.invoices_late
+        return 1.0 if total == 0 else self.invoices_settled / total
+
+    @property
+    def treds_eligible(self) -> bool:
+        """Buyers above 250cr must already be on TReDS - not our market."""
+        return self.turnover_band == "250cr+"
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+
+    id = Column(String, primary_key=True, default=lambda: _id("inv"))
+    mill_id = Column(String, ForeignKey("mills.id"), nullable=False)
+    buyer_id = Column(String, ForeignKey("buyers.id"))
+
+    number = Column(String)                 # human invoice no, e.g. INV-4471
+    amount = Column(Float, nullable=False)
+    issue_date = Column(DateTime)
+    due_date = Column(DateTime)
+
+    irn = Column(String, index=True)        # GST Invoice Reference Number
+    qr_verified = Column(Integer, default=0)
+    tier = Column(String, default="C")      # A | B | C
+    extraction_confidence = Column(Float, default=0.0)
+    extraction_json = Column(JSON)
+    mismatches = Column(JSON, default=list)
+
+    image_path = Column(String)
+    image_phash = Column(String, index=True)
+    fuzzy_key = Column(String, index=True)  # buyer_gstin|amount_rounded|due_date
+
+    status = Column(String, default="submitted")  # submitted|funded|rejected|settled
+    created_at = Column(DateTime, default=_now)
+
+    mill = relationship("Mill", back_populates="invoices")
+    buyer = relationship("Buyer", back_populates="invoices")
+    advance = relationship("Advance", back_populates="invoice", uselist=False)
+
+
+Index("ix_invoice_dedupe", Invoice.fuzzy_key, Invoice.status)
+
+
+class Advance(Base):
+    """One funding decision. `reasons` is stored, not just the score - that
+    stored array *is* the explainability feature."""
+    __tablename__ = "advances"
+
+    id = Column(String, primary_key=True, default=lambda: _id("adv"))
+    invoice_id = Column(String, ForeignKey("invoices.id"), nullable=False)
+    advance_rate = Column(Float, nullable=False)
+    face_value = Column(Float, nullable=False)
+    advance_amount = Column(Float, nullable=False)
+    discount_rate_30d = Column(Float, nullable=False)
+    fee = Column(Float, default=0.0)
+    net_disbursed = Column(Float, default=0.0)
+    reasons = Column(JSON, default=list)     # [{"code","label","delta"}]
+    decision = Column(String, default="approved")  # approved|rejected|clarify
+    reject_reason = Column(Text)
+    virtual_account = Column(String)
+    status = Column(String, default="disbursed")   # disbursed|settled
+    created_at = Column(DateTime, default=_now)
+
+    invoice = relationship("Invoice", back_populates="advance")
+    legs = relationship("EscrowLeg", back_populates="advance",
+                        order_by="EscrowLeg.priority")
+
+
+class EscrowLeg(Base):
+    """One rung of the payment waterfall. Priority 1 is paid first."""
+    __tablename__ = "escrow_legs"
+
+    id = Column(String, primary_key=True, default=lambda: _id("leg"))
+    advance_id = Column(String, ForeignKey("advances.id"), nullable=False)
+    priority = Column(Integer, nullable=False)
+    payee = Column(String, nullable=False)
+    category = Column(String)     # statutory|input|wages|owner
+    amount = Column(Float, nullable=False)
+    account_ref = Column(String)
+    status = Column(String, default="pending")  # pending|paid
+    paid_at = Column(DateTime)
+
+    advance = relationship("Advance", back_populates="legs")
+
+
+class Event(Base):
+    """Append-only. Never updated, never deleted."""
+    __tablename__ = "events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ts = Column(DateTime, default=_now, index=True)
+    type = Column(String, nullable=False, index=True)
+    subject_id = Column(String, index=True)
+    payload = Column(JSON, default=dict)
