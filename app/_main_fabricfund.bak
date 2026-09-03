@@ -1,0 +1,384 @@
+"""FabricFund API.
+
+A decoupled backend. The frontend is built separately and talks to this over
+HTTP/JSON only - CORS is open in dev, every response is a plain JSON shape
+documented in API.md, and there is no server-rendered HTML the frontend needs
+to care about. Interactive docs live at /docs, the OpenAPI schema at
+/openapi.json.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import shutil
+import uuid
+from pathlib import Path
+
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, PlainTextResponse
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
+from .config import INVOICE_DIR
+from .db import get_db
+from .models import Advance, Buyer, EscrowLeg, Event, Invoice, Mill
+from .schemas import ClarifyAnswer
+from .services import bureau, phash, runway
+from .services.pipeline import process
+from .services.extract import extract_offline
+
+# Demo clock. The seed data is anchored to this date so tenor and late-payment
+# maths are stable regardless of the wall clock at demo time.
+DEMO_TODAY = dt.date(2026, 9, 3)
+
+app = FastAPI(title="FabricFund API", version="1.0.0",
+              description="Invoice-backed working capital for textile MSMEs. "
+                          "See API.md for the frontend integration contract.")
+
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_credentials=False,
+    allow_methods=["*"], allow_headers=["*"])
+
+
+# --------------------------------------------------------------- serializers
+
+def mill_out(m: Mill) -> dict:
+    return {"id": m.id, "name": m.name, "gstin": m.gstin, "town": m.town,
+            "phone": m.phone, "looms": m.looms,
+            "cash_on_hand": m.cash_on_hand, "monthly_burn": m.monthly_burn,
+            "burn_lines": m.burn_lines}
+
+
+def buyer_out(b: Buyer) -> dict:
+    return {"id": b.id, "name": b.name, "gstin": b.gstin,
+            "turnover_band": b.turnover_band, "treds_eligible": b.treds_eligible,
+            "on_time_rate": round(b.on_time_rate, 3),
+            "invoices_settled": b.invoices_settled,
+            "invoices_late": b.invoices_late, "avg_days_late": b.avg_days_late,
+            "flagged_by_mills": b.flagged_by_mills or []}
+
+
+def invoice_out(i: Invoice, db: Session) -> dict:
+    adv = i.advance
+    return {
+        "id": i.id, "number": i.number, "mill_id": i.mill_id,
+        "buyer_id": i.buyer_id,
+        "buyer_name": i.buyer.name if i.buyer else None,
+        "mill_name": i.mill.name if i.mill else None,
+        "amount": i.amount,
+        "issue_date": i.issue_date.date().isoformat() if i.issue_date else None,
+        "due_date": i.due_date.date().isoformat() if i.due_date else None,
+        "tier": i.tier, "status": i.status,
+        "qr_verified": bool(i.qr_verified),
+        "extraction_confidence": i.extraction_confidence,
+        "image_url": f"/api/invoices/{i.id}/image",
+        "advance": advance_out(adv) if adv else None,
+    }
+
+
+def advance_out(a: Advance) -> dict:
+    return {
+        "id": a.id, "advance_rate": a.advance_rate, "face_value": a.face_value,
+        "advance_amount": a.advance_amount, "fee": a.fee,
+        "net_disbursed": a.net_disbursed,
+        "discount_rate_30d": a.discount_rate_30d,
+        "reasons": a.reasons, "status": a.status,
+        "virtual_account": a.virtual_account,
+        "escrow_legs": [
+            {"priority": l.priority, "payee": l.payee, "category": l.category,
+             "label": bureau_label(l.category), "amount": l.amount,
+             "status": l.status,
+             "paid_at": l.paid_at.isoformat() if l.paid_at else None}
+            for l in sorted(a.legs, key=lambda x: x.priority)],
+    }
+
+
+def bureau_label(category: str) -> str:
+    from .services.escrow import CATEGORY_LABEL
+    return CATEGORY_LABEL.get(category, category)
+
+
+# --------------------------------------------------------------- meta
+
+@app.get("/api/health")
+def health(db: Session = Depends(get_db)):
+    return {"status": "ok", "demo_today": DEMO_TODAY.isoformat(),
+            "mills": db.scalar(select(func.count()).select_from(Mill)),
+            "invoices": db.scalar(select(func.count()).select_from(Invoice))}
+
+
+# --------------------------------------------------------------- mills
+
+@app.get("/api/mills")
+def list_mills(db: Session = Depends(get_db)):
+    return [mill_out(m) for m in db.execute(select(Mill)).scalars()]
+
+
+@app.get("/api/mills/{mill_id}")
+def get_mill(mill_id: str, db: Session = Depends(get_db)):
+    m = db.get(Mill, mill_id)
+    if not m:
+        raise HTTPException(404, "mill not found")
+    return mill_out(m)
+
+
+@app.get("/api/mills/{mill_id}/runway")
+def mill_runway(mill_id: str, db: Session = Depends(get_db)):
+    m = db.get(Mill, mill_id)
+    if not m:
+        raise HTTPException(404, "mill not found")
+    return runway.compute(m)
+
+
+@app.get("/api/mills/{mill_id}/invoices")
+def mill_invoices(mill_id: str, db: Session = Depends(get_db)):
+    rows = db.execute(select(Invoice).where(Invoice.mill_id == mill_id)
+                      .order_by(Invoice.created_at.desc())).scalars()
+    return [invoice_out(i, db) for i in rows]
+
+
+# --------------------------------------------------------------- invoices
+
+@app.get("/api/invoices")
+def list_invoices(status: str | None = None, db: Session = Depends(get_db)):
+    stmt = select(Invoice).order_by(Invoice.created_at.desc())
+    if status:
+        stmt = stmt.where(Invoice.status == status)
+    return [invoice_out(i, db) for i in db.execute(stmt).scalars()]
+
+
+@app.get("/api/invoices/{invoice_id}")
+def get_invoice(invoice_id: str, db: Session = Depends(get_db)):
+    i = db.get(Invoice, invoice_id)
+    if not i:
+        raise HTTPException(404, "invoice not found")
+    out = invoice_out(i, db)
+    out["extraction"] = i.extraction_json
+    out["mismatches"] = i.mismatches
+    return out
+
+
+@app.get("/api/invoices/{invoice_id}/image")
+def invoice_image(invoice_id: str, db: Session = Depends(get_db)):
+    i = db.get(Invoice, invoice_id)
+    if not i or not i.image_path or not Path(i.image_path).exists():
+        raise HTTPException(404, "image not found")
+    return FileResponse(i.image_path, media_type="image/jpeg")
+
+
+@app.get("/api/samples")
+def sample_documents(db: Session = Depends(get_db)):
+    """Available (not-yet-funded) seeded documents the demo can submit,
+    plus the on-disk duplicate the frontend can POST to trigger a rejection."""
+    rows = db.execute(select(Invoice).where(Invoice.status == "available")
+                      ).scalars()
+    out = [{"invoice_id": i.id, "number": i.number, "tier": i.tier,
+            "mill_id": i.mill_id, "mill_name": i.mill.name,
+            "buyer_name": i.buyer.name if i.buyer else None,
+            "amount": i.amount, "image_url": f"/api/invoices/{i.id}/image"}
+           for i in rows]
+    dup = INVOICE_DIR / "inv-4471-resubmit.jpg"
+    if dup.exists():
+        out.append({"invoice_id": None, "number": "INV-4471 (re-submit)",
+                    "tier": "A", "special": "duplicate_of_funded",
+                    "filename": dup.name,
+                    "note": "Re-photograph of an already-funded invoice - "
+                            "submit to trigger the double-financing guard."})
+    return out
+
+
+# --------------------------------------------------------------- the core action
+
+def _run(db: Session, invoice: Invoice) -> dict:
+    return process(db, invoice, as_of=DEMO_TODAY)
+
+
+@app.post("/api/submit/sample/{invoice_id}")
+def submit_sample(invoice_id: str, db: Session = Depends(get_db)):
+    """Submit one of the seeded available documents for a funding decision.
+    This is the primary demo action from the console."""
+    i = db.get(Invoice, invoice_id)
+    if not i:
+        raise HTTPException(404, "invoice not found")
+    if i.status not in ("available", "clarify"):
+        raise HTTPException(409, f"invoice already {i.status}")
+    return _run(db, i)
+
+
+@app.post("/api/submit/upload")
+async def submit_upload(mill_id: str = Form(...), file: UploadFile = File(...),
+                        source: str = Form("console"),
+                        db: Session = Depends(get_db)):
+    """Submit a freshly uploaded photo (console drag-drop, or a WhatsApp media
+    download). Creates the invoice row, then runs the full pipeline."""
+    mill = db.get(Mill, mill_id)
+    if not mill:
+        raise HTTPException(404, "mill not found")
+
+    dest = INVOICE_DIR / f"upload-{uuid.uuid4().hex[:8]}-{file.filename}"
+    with dest.open("wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    ex = extract_offline(dest)  # cheap pre-read to seed amount/buyer fields
+    buyer = None
+    if ex.buyer_gstin:
+        buyer = db.execute(select(Buyer).where(
+            func.upper(Buyer.gstin) == ex.buyer_gstin.upper())).scalars().first()
+
+    parsed_amt = ex.total_amount or 0.0
+    due = None
+    if ex.payment_terms_days and ex.invoice_date:
+        try:
+            d = dt.datetime.strptime(ex.invoice_date, "%d/%m/%Y").date()
+            due = dt.datetime.combine(d + dt.timedelta(days=ex.payment_terms_days), dt.time())
+        except ValueError:
+            pass
+
+    inv = Invoice(mill_id=mill_id, buyer_id=buyer.id if buyer else None,
+                  number=ex.invoice_number or f"UP-{uuid.uuid4().hex[:5].upper()}",
+                  amount=parsed_amt, due_date=due,
+                  image_path=str(dest), image_phash=phash.combined(dest),
+                  status="available")
+    db.add(inv); db.flush()
+    return _run(db, inv)
+
+
+@app.post("/api/invoices/{invoice_id}/clarify")
+def clarify(invoice_id: str, answer: ClarifyAnswer,
+            db: Session = Depends(get_db)):
+    """Answer the one clarifying question raised when extraction confidence was
+    below the gate, then re-run the decision."""
+    i = db.get(Invoice, invoice_id)
+    if not i:
+        raise HTTPException(404, "invoice not found")
+    if answer.field == "total_amount":
+        try:
+            i.amount = float(str(answer.value).replace(",", ""))
+        except ValueError:
+            raise HTTPException(400, "amount not a number")
+    # a human-confirmed field clears the confidence gate
+    ex = i.extraction_json or {}
+    ex["overall_confidence"] = 0.95
+    i.extraction_json = ex
+    db.add(Event(type="clarify.answered", subject_id=i.id,
+                 payload={"field": answer.field, "value": answer.value}))
+    db.flush()
+    # bump stored confidence for the re-run by monkeypatching via a wrapper
+    result = process(db, i, as_of=DEMO_TODAY)
+    return result
+
+
+# --------------------------------------------------------------- lender console
+
+@app.get("/api/portfolio")
+def portfolio(db: Session = Depends(get_db)):
+    advances = db.execute(select(Advance).where(Advance.status == "disbursed")
+                          ).scalars().all()
+    total = sum(a.advance_amount for a in advances)
+    by_tier: dict[str, float] = {}
+    by_buyer: dict[str, float] = {}
+    for a in advances:
+        inv = a.invoice
+        by_tier[inv.tier] = by_tier.get(inv.tier, 0) + a.advance_amount
+        bname = inv.buyer.name if inv.buyer else "Unknown"
+        by_buyer[bname] = by_buyer.get(bname, 0) + a.advance_amount
+
+    from .config import BOOK_SIZE, MAX_EXPOSURE_PER_BUYER
+    concentration = [
+        {"buyer": name, "exposure": amt, "share": round(amt / total, 3) if total else 0,
+         "limit_breach": amt > MAX_EXPOSURE_PER_BUYER * BOOK_SIZE}
+        for name, amt in sorted(by_buyer.items(), key=lambda x: -x[1])]
+
+    return {
+        "book_size": BOOK_SIZE,
+        "deployed": round(total, 2),
+        "utilisation": round(total / BOOK_SIZE, 4),
+        "advances_count": len(advances),
+        "by_tier": {k: round(v, 2) for k, v in by_tier.items()},
+        "concentration": concentration,
+        "rings": bureau.find_rings(db),
+    }
+
+
+@app.get("/api/advances")
+def list_advances(db: Session = Depends(get_db)):
+    rows = db.execute(select(Advance).order_by(Advance.created_at.desc())).scalars()
+    out = []
+    for a in rows:
+        d = advance_out(a)
+        d["invoice_number"] = a.invoice.number
+        d["buyer_name"] = a.invoice.buyer.name if a.invoice.buyer else None
+        d["mill_name"] = a.invoice.mill.name if a.invoice.mill else None
+        out.append(d)
+    return out
+
+
+# --------------------------------------------------------------- bureau
+
+@app.get("/api/buyers")
+def list_buyers(db: Session = Depends(get_db)):
+    return [bureau.scorecard(db, b) for b in db.execute(select(Buyer)).scalars()]
+
+
+@app.get("/api/buyers/{buyer_id}")
+def get_buyer(buyer_id: str, db: Session = Depends(get_db)):
+    b = db.get(Buyer, buyer_id)
+    if not b:
+        raise HTTPException(404, "buyer not found")
+    card = bureau.scorecard(db, b)
+    card["invoices"] = [
+        {"number": i.number, "mill": i.mill.name if i.mill else None,
+         "amount": i.amount, "status": i.status,
+         "due_date": i.due_date.date().isoformat() if i.due_date else None}
+        for i in db.execute(select(Invoice).where(Invoice.buyer_id == buyer_id)).scalars()]
+    return card
+
+
+@app.post("/api/buyers/{buyer_id}/flag")
+def flag_buyer(buyer_id: str, mill_id: str = Form(...),
+               db: Session = Depends(get_db)):
+    """A mill reports a buyer as paying late. Reputation is shared across the
+    platform - two independent reports turn the node amber for everyone."""
+    b = db.get(Buyer, buyer_id)
+    if not b:
+        raise HTTPException(404, "buyer not found")
+    flags = set(b.flagged_by_mills or [])
+    flags.add(mill_id)
+    b.flagged_by_mills = list(flags)
+    db.add(Event(type="buyer.flagged", subject_id=buyer_id,
+                 payload={"mill_id": mill_id, "total_flags": len(flags)}))
+    db.commit()
+    return {"buyer_id": buyer_id, "flags": len(flags),
+            "amber": len(flags) >= 2}
+
+
+@app.get("/api/invoices/{invoice_id}/exposure")
+def invoice_exposure(invoice_id: str, db: Session = Depends(get_db)):
+    """The buyer's statutory exposure (MSMED s.16 interest + 43B(h) tax) plus
+    the ready-to-send buyer notice."""
+    i = db.get(Invoice, invoice_id)
+    if not i or not i.due_date:
+        raise HTTPException(404, "invoice or due date not found")
+    exp = bureau.statutory_exposure(amount=i.amount, due_date=i.due_date.date(),
+                                    as_of=DEMO_TODAY)
+    exp["notice"] = bureau.buyer_notice(
+        i.buyer.name if i.buyer else "Buyer", i.number, exp)
+    return exp
+
+
+# --------------------------------------------------------------- events / replay
+
+@app.get("/api/events")
+def list_events(limit: int = 50, db: Session = Depends(get_db)):
+    rows = db.execute(select(Event).order_by(Event.ts.desc()).limit(limit)).scalars()
+    return [{"id": e.id, "ts": e.ts.isoformat(), "type": e.type,
+             "subject_id": e.subject_id, "payload": e.payload} for e in rows]
+
+
+@app.post("/api/demo/reset")
+def demo_reset():
+    """Drop, reseed, and replay to a known state. Wire this to a button so a
+    run-through can be reset in seconds between judges."""
+    from .seed import run
+    summary = run(reset=True)
+    return {"reset": True, **summary}
