@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EFECE2; font-family:'Manrope','Noto Sans Tamil','Noto Sans Devanagari',system-ui,sans-serif; }
+  a { color:#0f766e; } a:hover { color:#0b5a54; }
+  *::-webkit-scrollbar { width:0; height:0; }
+  @keyframes sthirRise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @keyframes sthirPulse { 0%,100% { opacity:.55; transform:scale(1); } 50% { opacity:1; transform:scale(1.06); } }
+  @keyframes sthirFill { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+  @keyframes sthirSpin { to { transform:rotate(360deg); } }
+  @keyframes sthirBucket { from { opacity:0; transform:translateX(-18px) scaleX(.6); } to { opacity:1; transform:none; } }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:32px 16px 56px;background:
+  radial-gradient(900px 600px at 15% 0%, rgba(15,118,110,.14) 0%, rgba(15,118,110,0) 60%),
+  radial-gradient(700px 700px at 95% 20%, rgba(21,128,61,.12) 0%, rgba(21,128,61,0) 55%),
+  #EFECE2;">
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center">
+    <a href="Sthir%20Portals.dc.html" style="font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(15,23,42,.55);text-decoration:none">← Sthir · worker</a>
+    <span style="width:1px;height:14px;background:rgba(15,23,42,.18)"></span>
+    <div style="display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid rgba(15,23,42,.1);backdrop-filter:blur(12px)">
+      <button onClick="{{ setEn }}" style="border:0;cursor:pointer;padding:5px 12px;border-radius:999px;font:600 12px/1 Manrope,sans-serif;background:{{ enBg }};color:{{ enFg }}">English</button>
+      <button onClick="{{ setTa }}" style="border:0;cursor:pointer;padding:5px 12px;border-radius:999px;font:600 12px/1 'Noto Sans Tamil',sans-serif;background:{{ taBg }};color:{{ taFg }}">தமிழ்</button>
+      <button onClick="{{ setHi }}" style="border:0;cursor:pointer;padding:5px 12px;border-radius:999px;font:600 12px/1 'Noto Sans Devanagari',sans-serif;background:{{ hiBg }};color:{{ hiFg }}">हिन्दी</button>
+    </div>
+    <button onClick="{{ reset }}" title="Reset demo data" style="border:1px solid rgba(15,23,42,.09);background:rgba(255,255,255,.55);color:rgba(15,23,42,.4);cursor:pointer;padding:5px 10px;border-radius:999px;font:600 11px/1 Manrope,sans-serif">↺</button>
+  </div>
+
+  <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ true }}" hint-size="390px,844px">
+    <div style="height:100%;overflow-y:auto;background:
+      radial-gradient(600px 380px at 20% -5%, rgba(15,118,110,.08) 0%, rgba(15,118,110,0) 62%),
+      radial-gradient(520px 420px at 110% 12%, rgba(21,128,61,.07) 0%, rgba(21,128,61,0) 58%),
+      #FAF9F3;color:#0F172A;-webkit-font-smoothing:antialiased">
+
+      <div style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:rgba(250,249,243,.85);backdrop-filter:blur(18px);border-bottom:1px solid rgba(15,23,42,.08)">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <sc-if value="{{ showBack }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ back }}" style="flex:none;width:36px;height:36px;border-radius:12px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font-size:16px;cursor:pointer">←</button>
+          </sc-if>
+          <div style="min-width:0">
+            <div style="font-size:15px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ screenTitle }}</div>
+            <div style="font-size:11px;color:rgba(15,23,42,.45)">{{ screenSub }}</div>
+          </div>
+        </div>
+        <span style="flex:none;display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.32);font-size:9.5px;font-weight:700;color:#b45309;letter-spacing:.02em">
+          <span style="width:5px;height:5px;border-radius:50%;background:#d97706;animation:sthirPulse 2.4s infinite"></span>{{ t.demoChip }}
+        </span>
+      </div>
+
+      <div style="padding:18px 16px 40px;animation:sthirRise .35s ease both">
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="padding:2px 0 18px">
+              <div style="font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15">{{ t.homeHead }}</div>
+              <div style="margin-top:6px;font-size:13px;line-height:1.5;color:rgba(15,23,42,.55)">{{ t.homeSub }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ workers }}" as="w" hint-placeholder-count="3">
+                <button onClick="{{ w.open }}" style="display:block;width:100%;text-align:left;cursor:pointer;padding:16px;border-radius:22px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(150deg, rgba(255,255,255,.92), rgba(255,255,255,.6));backdrop-filter:blur(20px);box-shadow:0 18px 40px -24px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85);color:#0F172A;font-family:inherit" style-hover="border-color:rgba(15,118,110,.4)">
+                  <div style="display:flex;align-items:center;gap:14px">
+                    <div style="flex:none;position:relative;width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:{{ w.tint }};border:1px solid {{ w.ring }}">
+                      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;color:{{ w.color }};font-variant-numeric:tabular-nums">{{ w.score }}</div>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:16px;font-weight:700;letter-spacing:-.01em">{{ w.name }}</span>
+                        <sc-if value="{{ w.hasAlerts }}" hint-placeholder-val="{{ true }}">
+                          <span style="padding:2px 7px;border-radius:999px;background:rgba(194,64,44,.12);border:1px solid rgba(194,64,44,.35);font-size:10px;font-weight:700;color:#c2402c">{{ w.alertLabel }}</span>
+                        </sc-if>
+                      </div>
+                      <div style="margin-top:3px;font-size:12.5px;color:rgba(15,23,42,.55)">{{ w.occ }} · {{ w.city }}</div>
+                      <div style="margin-top:9px;display:flex;align-items:center;gap:8px">
+                        <div style="flex:1;height:6px;border-radius:999px;background:rgba(15,23,42,.08);overflow:hidden">
+                          <div style="height:100%;width:{{ w.pct }};border-radius:999px;background:{{ w.color }}"></div>
+                        </div>
+                        <span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:{{ w.color }}">{{ w.bandLabel }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </sc-for>
+            </div>
+            <div style="margin-top:22px;padding:14px 16px;border-radius:18px;border:1px dashed rgba(15,23,42,.18);background:rgba(255,255,255,.55);font-size:11.5px;line-height:1.6;color:rgba(15,23,42,.42)">{{ t.homeNote }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px">
+
+            <div style="padding:20px;border-radius:26px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(155deg, rgba(255,255,255,.94), rgba(255,255,255,.65));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.85)">
+              <div style="display:flex;align-items:center;gap:18px">
+                <div style="flex:none;position:relative;width:126px;height:126px;border-radius:50%;background:{{ gaugeBg }};display:flex;align-items:center;justify-content:center;box-shadow:0 0 34px -8px rgba(15,23,42,.1)">
+                  <div style="position:absolute;inset:11px;border-radius:50%;background:#FFFFFF;box-shadow:inset 0 2px 10px rgba(15,23,42,.08), inset 0 -1px 0 rgba(255,255,255,.7)"></div>
+                  <div style="position:relative;text-align:center">
+                    <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:{{ bandColor }};font-variant-numeric:tabular-nums">{{ score }}</div>
+                    <div style="margin-top:2px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(15,23,42,.4)">/ 100</div>
+                  </div>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">{{ t.resilience }}</div>
+                  <div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:{{ bandTint }};border:1px solid {{ bandRing }};font-size:12px;font-weight:700;color:{{ bandColor }}">{{ bandLabel }}</div>
+                  <div style="margin-top:14px;font-size:12.5px;color:rgba(15,23,42,.55)">{{ t.runwayLine }}</div>
+                  <div style="display:flex;align-items:baseline;gap:6px">
+                    <span style="font-size:30px;font-weight:800;letter-spacing:-.03em;color:#0F172A;font-variant-numeric:tabular-nums">{{ runway }}</span>
+                    <span style="font-size:13px;font-weight:600;color:rgba(15,23,42,.6)">{{ t.days }}</span>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(15,23,42,.08);font-size:12.5px;line-height:1.55;color:rgba(15,23,42,.6)">{{ workerNote }}</div>
+            </div>
+
+            <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.08);background:linear-gradient(155deg, rgba(255,255,255,.9), rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">{{ t.income12 }}</div>
+                <div style="text-align:right">
+                  <div style="font-size:17px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ weeklyAvg }}</div>
+                  <div style="font-size:10px;color:rgba(15,23,42,.4)">{{ t.weeklyAvg }}</div>
+                </div>
+              </div>
+              <div style="margin-top:16px;height:82px;display:flex;align-items:flex-end;gap:5px">
+                <sc-for list="{{ bars }}" as="bar" hint-placeholder-count="12">
+                  <div style="flex:1;height:{{ bar.h }};border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#0f766e,rgba(15,118,110,.3));opacity:{{ bar.dim }}"></div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.08);background:linear-gradient(155deg, rgba(255,255,255,.9), rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+              <div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">{{ t.subScores }}</div>
+              <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ subs }}" as="s" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span style="flex:none;width:78px;font-size:12px;font-weight:600;color:rgba(15,23,42,.72)">{{ s.label }}</span>
+                    <div style="flex:1;height:8px;border-radius:999px;background:rgba(15,23,42,.07);overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.1)">
+                      <div style="height:100%;width:{{ s.pct }};border-radius:999px;background:{{ s.color }};transform-origin:left;animation:sthirFill .6s ease both"></div>
+                    </div>
+                    <span style="flex:none;width:26px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ s.color }}">{{ s.val }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.08);background:linear-gradient(155deg, rgba(255,255,255,.9), rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">{{ t.obligations }}</div>
+                <div style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ oblTotal }}</div>
+              </div>
+              <div style="margin-top:14px;display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.6)">
+                <div style="width:{{ oblEssPct }};background:linear-gradient(90deg,#15803d,#16a34a)"></div>
+                <div style="width:{{ oblDebtPct }};background:linear-gradient(90deg,#c2402c,#e0644c)"></div>
+              </div>
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+                  <span style="width:8px;height:8px;border-radius:3px;background:#15803d"></span>
+                  <span style="flex:1;color:rgba(15,23,42,.62)">{{ t.essential }}</span>
+                  <span style="font-weight:700;font-variant-numeric:tabular-nums">{{ oblEssential }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+                  <span style="width:8px;height:8px;border-radius:3px;background:#c2402c"></span>
+                  <span style="flex:1;color:rgba(15,23,42,.62)">{{ t.debtService }}</span>
+                  <span style="font-weight:700;font-variant-numeric:tabular-nums">{{ oblDebt }}</span>
+                </div>
+              </div>
+            </div>
+
+            <button onClick="{{ goAlerts }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;padding:16px;border-radius:22px;border:1px solid rgba(194,64,44,.28);background:linear-gradient(150deg, rgba(194,64,44,.12), rgba(194,64,44,.04));backdrop-filter:blur(18px);color:#0F172A;font-family:inherit">
+              <span style="flex:none;width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:rgba(194,64,44,.15);border:1px solid rgba(194,64,44,.35);font-size:17px">⚠</span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:14px;font-weight:700">{{ t.openAlerts }}</span>
+                <span style="display:block;margin-top:2px;font-size:11.5px;color:rgba(15,23,42,.55)">{{ alertCount }} · {{ t.viewAll }}</span>
+              </span>
+              <span style="flex:none;color:rgba(15,23,42,.4);font-size:18px">›</span>
+            </button>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <button onClick="{{ goSubmit }}" style="cursor:pointer;padding:15px;border-radius:20px;border:1px solid rgba(15,118,110,.32);background:linear-gradient(150deg,rgba(15,118,110,.15),rgba(15,118,110,.04));color:#0f766e;font:700 13px/1.3 inherit;text-align:left;backdrop-filter:blur(14px)">{{ t.nav.submit }}</button>
+              <button onClick="{{ goAdvance }}" style="cursor:pointer;padding:15px;border-radius:20px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px/1.3 inherit;text-align:left;backdrop-filter:blur(14px)">{{ t.nav.advance }}</button>
+              <button onClick="{{ goIncome }}" style="cursor:pointer;padding:15px;border-radius:20px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px/1.3 inherit;text-align:left;backdrop-filter:blur(14px)">{{ t.nav.income }}</button>
+              <button onClick="{{ goSavings }}" style="cursor:pointer;padding:15px;border-radius:20px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px/1.3 inherit;text-align:left;backdrop-filter:blur(14px)">
+                {{ t.nav.savings }}
+                <span style="display:block;margin-top:4px;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;color:#15803d">{{ savingsBal }}</span>
+              </button>
+            </div>
+
+            <button onClick="{{ goEntitle }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:15px 16px;border-radius:20px;border:1px solid rgba(21,128,61,.3);background:linear-gradient(150deg,rgba(21,128,61,.14),rgba(21,128,61,.04));color:#15803d;font:700 13px/1.3 inherit;text-align:left;backdrop-filter:blur(14px)">
+              <span style="flex:1">{{ t.nav.entitle }}</span><span style="color:rgba(15,23,42,.45)">›</span>
+            </button>
+
+            <button onClick="{{ goCrisis }}" style="cursor:pointer;padding:17px;border-radius:22px;border:1px solid rgba(194,64,44,.5);background:linear-gradient(150deg,#c2402c,#8f2818);color:#fff;font:800 15px/1.2 inherit;letter-spacing:-.01em;box-shadow:0 14px 28px -16px rgba(194,64,44,.45), inset 0 1px 0 rgba(255,255,255,.22)">{{ t.nav.crisis }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="padding-bottom:16px">
+              <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">{{ alertsHead }}</div>
+              <div style="margin-top:5px;font-size:12.5px;color:rgba(15,23,42,.55)">{{ alertsSub }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+                <div style="padding:16px;border-radius:24px;border:1px solid {{ a.sevRing }};background:linear-gradient(155deg, {{ a.sevTint }}, rgba(255,255,255,.02));backdrop-filter:blur(18px);box-shadow:0 20px 44px -28px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="padding:4px 9px;border-radius:999px;background:{{ a.sevTint }};border:1px solid {{ a.sevRing }};font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:{{ a.sevColor }}">{{ a.sevLabel }}</span>
+                    <span style="font-family:ui-monospace,monospace;font-size:10px;color:rgba(15,23,42,.35)">{{ a.code }}</span>
+                  </div>
+                  <div style="margin-top:11px;font-size:16.5px;font-weight:800;letter-spacing:-.02em;line-height:1.25;color:{{ a.sevColor }};text-wrap:pretty">{{ a.title }}</div>
+                  <div style="margin-top:7px;font-size:12.5px;line-height:1.55;color:rgba(15,23,42,.66);text-wrap:pretty">{{ a.detail }}</div>
+                  <div style="margin-top:15px;padding-top:14px;border-top:1px solid rgba(15,23,42,.08)">
+                    <div style="font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.4)">{{ ladderLabel }}</div>
+                    <div style="margin-top:11px;display:flex;flex-direction:column;gap:9px">
+                      <sc-for list="{{ a.steps }}" as="s" hint-placeholder-count="3">
+                        <div style="display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:15px;background:rgba(255,255,255,.6);border:1px solid rgba(15,23,42,.08)">
+                          <span style="flex:none;width:20px;height:20px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(15,118,110,.12);border:1px solid rgba(15,118,110,.3);font-size:10.5px;font-weight:800;color:#0f766e">{{ s.n }}</span>
+                          <span style="flex:1;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.82);text-wrap:pretty">{{ s.step }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noneOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:26px 18px;border-radius:22px;border:1px solid rgba(21,128,61,.25);background:rgba(21,128,61,.07);text-align:center;font-size:13px;color:#15803d">{{ noAlerts }}</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isIncome }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding-bottom:16px">
+              <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">{{ incomeHead }}</div>
+              <div style="margin-top:5px;font-size:12.5px;color:rgba(15,23,42,.55)">{{ incomeSub }}</div>
+            </div>
+            <div style="display:flex;gap:8px;padding:12px 14px;border-radius:18px;border:1px solid rgba(15,23,42,.08);background:rgba(255,255,255,.6);margin-bottom:14px">
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:10.5px;line-height:1.4;color:rgba(15,23,42,.5)">
+                <span><strong style="color:#15803d">A</strong> — crypto-verified payout</span>
+                <span><strong style="color:#0f766e">B</strong> — plausible reference match</span>
+                <span><strong style="color:#b45309">C</strong> — AI-read from photo</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <sc-for list="{{ incomeGroups }}" as="g" hint-placeholder-count="3">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px">
+                    <span style="font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,23,42,.4)">{{ g.week }}</span>
+                    <span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">{{ g.totalFmt }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ g.rows }}" as="e" hint-placeholder-count="2">
+                      <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:19px;border:1px solid rgba(15,23,42,.08);background:linear-gradient(150deg,rgba(255,255,255,.88),rgba(255,255,255,.6));backdrop-filter:blur(16px)">
+                        <span style="flex:none;width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:{{ e.tierTint }};border:1px solid {{ e.tierRing }};font-size:13px;font-weight:800;color:{{ e.tierColor }}">{{ e.tier }}</span>
+                        <span style="flex:1;min-width:0">
+                          <span style="display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.src }}</span>
+                          <span style="display:block;margin-top:2px;font-size:10.5px;color:rgba(15,23,42,.45)">{{ e.date }} · {{ e.kind }} · {{ e.tierNote }}</span>
+                        </span>
+                        <span style="flex:none;text-align:right">
+                          <span style="display:block;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">{{ e.grossFmt }}</span>
+                          <sc-if value="{{ e.isOverdue }}" hint-placeholder-val="{{ true }}">
+                            <span style="display:block;margin-top:2px;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#b45309">{{ e.statusLabel }}</span>
+                          </sc-if>
+                        </span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCrisis }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-if value="{{ cPick }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="padding-bottom:18px">
+                  <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">What happened?</div>
+                  <div style="margin-top:5px;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.55)">Photograph the bill, estimate or damage. Sthir checks free government cover before it lends you anything.</div>
+                </div>
+                <div style="padding:22px 18px;border-radius:22px;border:1px dashed rgba(194,64,44,.4);background:rgba(194,64,44,.07);text-align:center">
+                  <div style="font-size:14px;font-weight:800;color:#c2402c">Take a photo now</div>
+                  <div style="margin-top:4px;font-size:11px;color:rgba(15,23,42,.5)">Bill, hospital estimate, or damage</div>
+                </div>
+                <div style="margin:18px 0 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.4)">Or run a demo case</div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ crisisCases }}" as="c" hint-placeholder-count="3">
+                    <button onClick="{{ c.pick }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;padding:13px;border-radius:19px;border:1px solid rgba(15,23,42,.09);background:rgba(255,255,255,.6);color:#0F172A;font-family:inherit">
+                      <span style="flex:none;width:46px;height:46px;border-radius:13px;border:1px solid rgba(15,23,42,.1);background:repeating-linear-gradient(135deg,rgba(15,23,42,.07) 0 6px,rgba(15,23,42,.02) 6px 12px);font:600 6.5px/1.2 ui-monospace,monospace;color:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;text-align:center;padding:3px">{{ c.ph }}</span>
+                      <span style="flex:1;font-size:13px;font-weight:700;line-height:1.35">{{ c.label }}</span>
+                      <span style="flex:none;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:rgba(15,23,42,.55)">{{ c.amt }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cAssessing }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:70px 20px;text-align:center">
+                <div style="margin:0 auto;width:70px;height:70px;border-radius:50%;border:3px solid rgba(194,64,44,.2);border-top-color:#c2402c;animation:sthirSpin 1s linear infinite"></div>
+                <div style="margin-top:22px;font-size:15px;font-weight:700">Reading your document…</div>
+                <div style="margin-top:6px;font-size:12px;color:rgba(15,23,42,.5)">Then checking every scheme you qualify for</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cResult }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+                  <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">Assessment</div>
+                  <div style="margin-top:9px;font-size:17px;font-weight:800;letter-spacing:-.02em;line-height:1.3">{{ ccType }}</div>
+                  <div style="margin-top:6px;font-size:12.5px;color:rgba(15,23,42,.6)">{{ ccVendor }} · {{ ccAmount }}</div>
+                  <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">
+                    <sc-for list="{{ ccRead }}" as="k" hint-placeholder-count="3">
+                      <div style="display:flex;gap:9px;font-size:12px;line-height:1.45;color:rgba(15,23,42,.7)">
+                        <span style="flex:none;color:#15803d;font-weight:800">✓</span><span style="flex:1;text-wrap:pretty">{{ k.r }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{ ccCovered }}" hint-placeholder-val="{{ true }}">
+                  <div style="padding:22px;border-radius:26px;border:1px solid rgba(21,128,61,.35);background:linear-gradient(155deg,rgba(21,128,61,.14),rgba(255,255,255,.55));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                    <div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#15803d">Good news</div>
+                    <div style="margin-top:10px;font-size:20px;font-weight:800;line-height:1.3;letter-spacing:-.02em;text-wrap:pretty">This is fully covered for free by {{ ccScheme }}. No loan needed.</div>
+                    <div style="margin-top:18px;display:flex;gap:12px">
+                      <div style="flex:1;padding:14px;border-radius:18px;background:rgba(15,23,42,.05)">
+                        <div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,23,42,.45)">Covered free</div>
+                        <div style="margin-top:4px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:#15803d">{{ ccAmount }}</div>
+                      </div>
+                      <div style="flex:1;padding:14px;border-radius:18px;background:rgba(15,23,42,.05)">
+                        <div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,23,42,.45)">You borrow</div>
+                        <div style="margin-top:4px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:#0F172A">₹0</div>
+                      </div>
+                    </div>
+                    <button onClick="{{ goEntitle }}" style="margin-top:16px;width:100%;cursor:pointer;padding:15px;border-radius:16px;border:1px solid rgba(21,128,61,.4);background:linear-gradient(150deg,#15803d,#16a34a);color:#FFFFFF;font:800 14px inherit">See the claim steps</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ ccVendorPaid }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:22px;border-radius:26px;border:1px solid rgba(15,118,110,.35);background:linear-gradient(155deg,rgba(15,118,110,.14),rgba(255,255,255,.55));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                    <div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0f766e">Emergency advance sent</div>
+                    <div style="margin-top:10px;font-size:20px;font-weight:800;line-height:1.3;letter-spacing:-.02em;text-wrap:pretty">Paid {{ ccAmount }} directly to {{ ccVendor }} over UPI.</div>
+                    <div style="margin-top:12px;padding:13px;border-radius:16px;background:rgba(15,23,42,.05);font-size:12.5px;line-height:1.55;color:rgba(15,23,42,.72)">The money never touches your balance, so it cannot be swept toward your existing debt. Repayment starts from next week’s verified payout.</div>
+                  </div>
+                </sc-if>
+
+                <button onClick="{{ resetCrisis }}" style="cursor:pointer;padding:15px;border-radius:18px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px inherit">Run another case</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEntitlements }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding-bottom:16px">
+              <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">Free coverage first, borrowing last</div>
+              <div style="margin-top:5px;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.55)">Schemes you already qualify for, based on your e-Shram registration and income band.</div>
+            </div>
+            <sc-if value="{{ hasOffset }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-bottom:14px;padding:18px;border-radius:24px;border:1px solid rgba(21,128,61,.35);background:linear-gradient(155deg,rgba(21,128,61,.13),rgba(255,255,255,.55));backdrop-filter:blur(20px)">
+                <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#15803d">Welfare offset applied</div>
+                <div style="margin-top:9px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                  <span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:#15803d">{{ offsetCovered }}</span>
+                  <span style="font-size:13px;color:rgba(15,23,42,.6)">covered free</span>
+                  <span style="font-size:15px;color:rgba(15,23,42,.4)">→</span>
+                  <span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">₹0</span>
+                  <span style="font-size:13px;color:rgba(15,23,42,.6)">loan</span>
+                </div>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ schemes }}" as="s" hint-placeholder-count="4">
+                <div style="padding:15px;border-radius:21px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(150deg,rgba(255,255,255,.88),rgba(255,255,255,.6));backdrop-filter:blur(16px)">
+                  <div style="display:flex;align-items:flex-start;gap:10px">
+                    <div style="flex:1;font-size:14px;font-weight:700;line-height:1.35;letter-spacing:-.01em">{{ s.name }}</div>
+                    <span style="flex:none;padding:4px 9px;border-radius:999px;background:rgba(21,128,61,.1);border:1px solid rgba(21,128,61,.3);font-size:10px;font-weight:800;color:#15803d">{{ s.premium }}</span>
+                  </div>
+                  <div style="margin-top:7px;font-size:12px;line-height:1.5;color:rgba(15,23,42,.6)">{{ s.note }}</div>
+                  <div style="margin-top:11px;display:flex;align-items:center;justify-content:space-between;padding-top:11px;border-top:1px solid rgba(15,23,42,.08)">
+                    <span style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(15,23,42,.4)">Max cover</span>
+                    <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.coverFmt }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAdvance }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-if value="{{ aAsk }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="padding-bottom:18px">
+                  <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">How much do you need?</div>
+                  <div style="margin-top:5px;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.55)">Advances are taken against verified income only. Sthir will refuse if borrowing would make things worse.</div>
+                </div>
+                <div style="padding:20px;border-radius:24px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.6));backdrop-filter:blur(20px)">
+                  <div style="text-align:center;font-size:42px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums">{{ amtFmt }}</div>
+                  <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                    <sc-for list="{{ amtOptions }}" as="o" hint-placeholder-count="4">
+                      <button onClick="{{ o.pick }}" style="cursor:pointer;padding:13px;border-radius:15px;border:1px solid rgba(15,23,42,.1);background:{{ o.bg }};color:{{ o.fg }};font:800 14px inherit;font-variant-numeric:tabular-nums">{{ o.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <button onClick="{{ decide }}" style="margin-top:14px;width:100%;cursor:pointer;padding:17px;border-radius:20px;border:1px solid rgba(15,118,110,.4);background:linear-gradient(150deg,#0f766e,#14b8a6);color:#FFFFFF;font:800 15px inherit;box-shadow:0 14px 28px -16px rgba(15,118,110,.45)">Ask Sthir</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ aDecided }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+
+                <sc-if value="{{ isApproved }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="padding:20px;border-radius:26px;border:1px solid rgba(21,128,61,.3);background:linear-gradient(155deg,rgba(21,128,61,.14),rgba(255,255,255,.55));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                      <div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#15803d">Approved</div>
+                      <div style="margin-top:8px;font-size:34px;font-weight:800;letter-spacing:-.035em;font-variant-numeric:tabular-nums">{{ amtFmt }}</div>
+                      <div style="margin-top:6px;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.6)">Split into buckets before it reaches you, so rent and the EMI are already handled.</div>
+                    </div>
+                    <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+                      <div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">Allocation</div>
+                      <div style="margin-top:14px;display:flex;flex-direction:column;gap:11px">
+                        <sc-for list="{{ alloc }}" as="a" hint-placeholder-count="4">
+                          <div style="animation:sthirBucket .5s ease both">
+                            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                              <span style="font-size:12.5px;font-weight:600;color:rgba(15,23,42,.78)">{{ a.label }}</span>
+                              <span style="font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ a.color }}">{{ a.amtFmt }}</span>
+                            </div>
+                            <div style="margin-top:6px;height:9px;border-radius:999px;background:rgba(15,23,42,.06);overflow:hidden">
+                              <div style="height:100%;width:{{ a.pct }};border-radius:999px;background:{{ a.color }};transform-origin:left;animation:sthirFill .7s ease both"></div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div style="margin-top:16px;padding:13px;border-radius:16px;background:rgba(15,118,110,.06);border:1px solid rgba(15,118,110,.18)">
+                        <div style="font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.4)">Virtual UPI account</div>
+                        <div style="margin-top:5px;font:700 14px/1.2 ui-monospace,monospace;color:#0f766e">{{ vpa }}</div>
+                      </div>
+                    </div>
+                    <button onClick="{{ resetAdvance }}" style="cursor:pointer;padding:15px;border-radius:18px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px inherit">Change the amount</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isRefused }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="padding:20px;border-radius:26px;border:1px solid rgba(194,64,44,.3);background:linear-gradient(155deg,rgba(194,64,44,.12),rgba(255,255,255,.55));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(194,64,44,.14);border:1px solid rgba(194,64,44,.35);font-size:17px">🛡</span>
+                        <div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c2402c">Held back to protect you</div>
+                      </div>
+                      <div style="margin-top:14px;font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.3;text-wrap:pretty">Another advance now would deepen the hole, not fill it.</div>
+                      <div style="margin-top:9px;font-size:12.5px;line-height:1.6;color:rgba(15,23,42,.68);text-wrap:pretty">Debt service is already 42% of your income and the moneylender loan runs at 60% APR. Borrowing on top of that raises your monthly outflow by ₹1,450 without changing the principal.</div>
+                    </div>
+                    <div style="padding:18px;border-radius:24px;border:1px solid rgba(21,128,61,.28);background:linear-gradient(155deg,rgba(21,128,61,.12),rgba(255,255,255,.55));backdrop-filter:blur(18px)">
+                      <div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">Better option, ready now</div>
+                      <div style="margin-top:9px;font-size:16px;font-weight:800;color:#15803d;letter-spacing:-.01em">Refinance the moneylender at 24% APR</div>
+                      <div style="margin-top:7px;font-size:12.5px;line-height:1.55;color:rgba(15,23,42,.68)">A partner NBFC takes over the ₹40,000 hand loan. Your monthly debt service drops from ₹7,400 to ₹5,300 and the principal actually falls.</div>
+                      <button style="margin-top:15px;width:100%;cursor:pointer;padding:15px;border-radius:16px;border:1px solid rgba(21,128,61,.4);background:linear-gradient(150deg,#15803d,#16a34a);color:#FFFFFF;font:800 14px inherit">Start the refinance</button>
+                    </div>
+                    <button onClick="{{ resetAdvance }}" style="cursor:pointer;padding:15px;border-radius:18px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px inherit">Back</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isClarify }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="padding:20px;border-radius:26px;border:1px solid rgba(217,119,6,.32);background:linear-gradient(155deg,rgba(217,119,6,.1),rgba(255,255,255,.55));backdrop-filter:blur(22px)">
+                      <div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#b45309">One question first</div>
+                      <div style="margin-top:12px;font-size:17px;font-weight:800;line-height:1.35;letter-spacing:-.015em;text-wrap:pretty">{{ clarifyQ }}</div>
+                      <div style="margin-top:8px;font-size:12px;color:rgba(15,23,42,.55)">Double-financing the same invoice is the most common way workers get trapped.</div>
+                      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                        <button onClick="{{ clarifyNo }}" style="cursor:pointer;padding:15px;border-radius:16px;border:1px solid rgba(15,118,110,.4);background:linear-gradient(150deg,#0f766e,#14b8a6);color:#FFFFFF;font:800 14px inherit">No, it hasn’t</button>
+                        <button onClick="{{ clarifyYes }}" style="cursor:pointer;padding:15px;border-radius:16px;border:1px solid rgba(15,23,42,.12);background:rgba(255,255,255,.6);color:#0F172A;font:700 14px inherit">Yes, it has</button>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSubmit }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-if value="{{ sPick }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="padding-bottom:16px">
+                  <div style="font-size:23px;font-weight:800;letter-spacing:-.02em">Submit proof of income</div>
+                  <div style="margin-top:5px;font-size:12.5px;line-height:1.5;color:rgba(15,23,42,.55)">A payout screenshot, an invoice photo, or a handwritten receipt. Verification decides how much it counts.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ samples }}" as="s" hint-placeholder-count="3">
+                    <button onClick="{{ s.pick }}" style="display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;padding:13px;border-radius:20px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(150deg,rgba(255,255,255,.88),rgba(255,255,255,.6));backdrop-filter:blur(16px);color:#0F172A;font-family:inherit" style-hover="border-color:rgba(15,118,110,.4)">
+                      <span style="flex:none;width:52px;height:52px;border-radius:14px;border:1px solid rgba(15,23,42,.1);background:repeating-linear-gradient(135deg,rgba(15,23,42,.07) 0 6px,rgba(15,23,42,.02) 6px 12px);display:flex;align-items:center;justify-content:center;font:600 7px/1.2 ui-monospace,monospace;color:rgba(15,23,42,.5);text-align:center;padding:4px">{{ s.ph }}</span>
+                      <span style="flex:1;min-width:0">
+                        <span style="display:block;font-size:13.5px;font-weight:700">{{ s.src }}</span>
+                        <span style="display:block;margin-top:3px;font-size:11px;color:rgba(15,23,42,.45)">{{ s.kind }} · ref {{ s.ref }}</span>
+                      </span>
+                      <span style="flex:none;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.grossFmt }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="margin-top:14px;padding:18px;border-radius:20px;border:1px dashed rgba(15,118,110,.35);background:rgba(15,118,110,.05);text-align:center">
+                  <div style="font-size:13px;font-weight:700;color:#0f766e">Upload a new photo</div>
+                  <div style="margin-top:4px;font-size:11px;color:rgba(15,23,42,.45)">Camera or gallery · JPG, PNG, PDF</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sVerifying }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:70px 20px;text-align:center">
+                <div style="margin:0 auto;width:70px;height:70px;border-radius:50%;border:3px solid rgba(15,118,110,.2);border-top-color:#0f766e;animation:sthirSpin 1s linear infinite"></div>
+                <div style="margin-top:22px;font-size:15px;font-weight:700">Verifying your proof…</div>
+                <div style="margin-top:6px;font-size:12px;color:rgba(15,23,42,.5)">Checking references, amounts and image history</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sResult }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="padding:18px;border-radius:24px;border:1px solid {{ smpTierRing }};background:linear-gradient(155deg,{{ smpTierTint }},rgba(255,255,255,.55));backdrop-filter:blur(20px);box-shadow:0 24px 46px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+                  <div style="display:flex;align-items:center;gap:14px">
+                    <div style="flex:none;width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:{{ smpTierTint }};border:1px solid {{ smpTierRing }};font-size:26px;font-weight:800;color:{{ smpTierColor }}">{{ smpTier }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">Verified · tier {{ smpTier }}</div>
+                      <div style="margin-top:4px;font-size:14px;font-weight:700;color:{{ smpTierColor }}">{{ smpTierNote }}</div>
+                      <div style="margin-top:3px;font-size:11.5px;color:rgba(15,23,42,.5)">{{ smpSrc }} · {{ smpGross }}</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:15px;display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ smpChecks }}" as="k" hint-placeholder-count="3">
+                      <div style="display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.45;color:rgba(15,23,42,.75)">
+                        <span style="flex:none;color:#15803d;font-weight:800">✓</span><span style="flex:1;text-wrap:pretty">{{ k.c }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:14px;padding:11px 13px;border-radius:14px;background:rgba(15,23,42,.05);display:flex;align-items:center;gap:11px">
+                    <span style="flex:none;width:40px;height:40px;border-radius:11px;border:1px solid rgba(15,23,42,.1);background:repeating-linear-gradient(135deg,rgba(15,23,42,.07) 0 6px,rgba(15,23,42,.02) 6px 12px);font:600 6.5px/1.2 ui-monospace,monospace;color:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;text-align:center;padding:3px">{{ smpPh }}</span>
+                    <span style="font-size:11px;color:rgba(15,23,42,.5)">Evidence on file · ref {{ smpRef }}</span>
+                  </div>
+                </div>
+
+                <div style="padding:18px;border-radius:24px;border:1px solid rgba(15,23,42,.09);background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.6));backdrop-filter:blur(18px)">
+                  <div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">Resilience refreshed</div>
+                  <div style="margin-top:14px;display:flex;align-items:center;gap:14px">
+                    <div style="text-align:center">
+                      <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:rgba(15,23,42,.45);font-variant-numeric:tabular-nums">{{ scoreBefore }}</div>
+                      <div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,23,42,.35)">before</div>
+                    </div>
+                    <div style="flex:1;height:10px;border-radius:999px;background:rgba(15,23,42,.07);position:relative;overflow:hidden">
+                      <div style="position:absolute;inset:0;width:{{ beforeWidth }};background:rgba(15,23,42,.12)"></div>
+                      <div style="position:absolute;inset:0;width:{{ afterWidth }};background:linear-gradient(90deg,#15803d,#16a34a);transform-origin:left;animation:sthirFill .8s ease both"></div>
+                    </div>
+                    <div style="text-align:center">
+                      <div style="font-size:30px;font-weight:800;letter-spacing:-.035em;color:#15803d;font-variant-numeric:tabular-nums">{{ scoreAfter }}</div>
+                      <div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#15803d">{{ deltaLabel }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <button onClick="{{ submitAgain }}" style="cursor:pointer;padding:15px;border-radius:18px;border:1px solid rgba(15,23,42,.1);background:rgba(255,255,255,.6);color:#0F172A;font:700 13px inherit">Submit another</button>
+                  <button onClick="{{ goAdvanceFromSubmit }}" style="cursor:pointer;padding:15px;border-radius:18px;border:1px solid rgba(15,118,110,.4);background:linear-gradient(150deg,rgba(15,118,110,.2),rgba(15,118,110,.06));color:#0f766e;font:800 13px inherit">Request an advance</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSavings }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="padding:22px;border-radius:26px;border:1px solid rgba(21,128,61,.3);background:linear-gradient(155deg,rgba(21,128,61,.14),rgba(255,255,255,.55));backdrop-filter:blur(22px);box-shadow:0 26px 50px -30px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.85)">
+              <div style="font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.45)">{{ savingsHead }}</div>
+              <div style="margin-top:8px;font-size:38px;font-weight:800;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums;color:#0F172A">{{ savBalance }}</div>
+              <div style="margin-top:16px;height:10px;border-radius:999px;background:rgba(15,23,42,.08);overflow:hidden;box-shadow:inset 0 1px 4px rgba(15,23,42,.12)">
+                <div style="height:100%;width:{{ savPct }};border-radius:999px;background:linear-gradient(90deg,#15803d,#16a34a)"></div>
+              </div>
+              <div style="margin-top:9px;font-size:11.5px;color:rgba(15,23,42,.55)">{{ savPct }} {{ savTargetLabel }} ({{ savTarget }})</div>
+              <div style="margin-top:14px;padding-top:13px;border-top:1px solid rgba(15,23,42,.09);font-size:12px;line-height:1.5;color:rgba(15,23,42,.6)">{{ savingsSub }}</div>
+            </div>
+            <div style="margin-top:16px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(15,23,42,.4);padding:0 4px 10px">{{ ledgerLabel }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ ledger }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:19px;border:1px solid rgba(15,23,42,.08);background:rgba(255,255,255,.6)">
+                  <span style="flex:none;width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:{{ r.tint }};font-size:13px;font-weight:800;color:{{ r.color }}">{{ r.glyph }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:13px;font-weight:600;color:rgba(15,23,42,.85)">{{ r.label }}</span>
+                    <span style="display:block;margin-top:2px;font-size:10.5px;color:rgba(15,23,42,.4)">{{ r.date }}</span>
+                  </span>
+                  <span style="flex:none;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.amtFmt }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </x-import>
+
+  <div style="font-size:11.5px;color:rgba(15,23,42,.4);text-align:center;max-width:390px;line-height:1.6">All money movement is a prototype simulation. No real funds move.</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;440&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;startLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ta&quot;,&quot;hi&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo setup&quot;},&quot;startWorker&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;w1&quot;,&quot;w2&quot;,&quot;w3&quot;],&quot;default&quot;:&quot;w1&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo setup&quot;},&quot;verifyDelayMs&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:4000,&quot;step&quot;:250,&quot;default&quot;:1500,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo setup&quot;}}">
+const BAND = {
+  critical:  { color:'#c2402c', tint:'rgba(194,64,44,.14)', ring:'rgba(194,64,44,.35)' },
+  fragile:   { color:'#b45309', tint:'rgba(217,119,6,.14)',  ring:'rgba(217,119,6,.35)' },
+  building:  { color:'#0f766e', tint:'rgba(15,118,110,.14)', ring:'rgba(15,118,110,.35)' },
+  resilient: { color:'#15803d', tint:'rgba(21,128,61,.14)',  ring:'rgba(21,128,61,.35)' },
+};
+
+const STR = {
+  en: { demoChip:'Demo · simulated funds', homeHead:'Who is using Sthir?', homeSub:'Pick a worker to open their resilience dashboard. Three demo profiles, three very different weeks.', homeNote:'Sthir verifies proof of income, scores financial resilience, warns before a cash crisis, and routes emergencies to free government cover before any loan.',
+       bands:{critical:'Critical',fragile:'Fragile',building:'Building',resilient:'Resilient'}, alerts:'alerts', workers:'Workers',
+       resilience:'Resilience score', runwayLine:'Your money lasts', days:'days', income12:'Income · last 12 weeks', weeklyAvg:'weekly average',
+       subScores:'What moves the score', sRunway:'Runway', sSavings:'Savings', sStability:'Stability', sCoverage:'Coverage',
+       obligations:'Monthly obligations', essential:'Essential (rent, food, fuel)', debtService:'Debt service', openAlerts:'Open alerts', viewAll:'View all',
+       nav:{ submit:'Submit income', advance:'Request advance', savings:'Savings', income:'Income history', crisis:'I have an emergency', entitle:'Free government cover' } },
+  ta: { demoChip:'டெமோ · உருவகப் பணம்', homeHead:'ஸ்திரை யார் பயன்படுத்துகிறார்?', homeSub:'ஒரு தொழிலாளியைத் தேர்ந்தெடுத்து அவரது நிதி நிலைத்தன்மை டாஷ்போர்டைத் திறக்கவும்.', homeNote:'ஸ்திர் வருமானச் சான்றை சரிபார்க்கிறது, நிதி நிலைத்தன்மையை மதிப்பிடுகிறது, பணப் பிரச்சினைக்கு முன்பே எச்சரிக்கிறது, அவசர நிலையில் கடனுக்கு முன் இலவச அரசு உதவிக்கு வழிகாட்டுகிறது.',
+       bands:{critical:'மிக மோசம்',fragile:'பலவீனம்',building:'வளர்ச்சி',resilient:'நிலையானது'}, alerts:'எச்சரிக்கை', workers:'தொழிலாளர்கள்',
+       resilience:'நிலைத்தன்மை மதிப்பெண்', runwayLine:'உங்கள் பணம் நீடிக்கும்', days:'நாட்கள்', income12:'வருமானம் · கடந்த 12 வாரங்கள்', weeklyAvg:'வாராந்திர சராசரி',
+       subScores:'மதிப்பெண்ணை நகர்த்துவது', sRunway:'நீடிப்பு', sSavings:'சேமிப்பு', sStability:'நிலைத்தன்மை', sCoverage:'பாதுகாப்பு',
+       obligations:'மாதாந்திர கடமைகள்', essential:'அத்தியாவசியம் (வாடகை, உணவு, எரிபொருள்)', debtService:'கடன் தவணை', openAlerts:'திறந்த எச்சரிக்கைகள்', viewAll:'அனைத்தும்',
+       nav:{ submit:'வருமானம் சமர்ப்பிக்க', advance:'முன்பணம் கேட்க', savings:'சேமிப்பு', income:'வருமான வரலாறு', crisis:'எனக்கு அவசரம்', entitle:'இலவச அரசு உதவி' } },
+  hi: { demoChip:'डेमो · नकली धनराशि', homeHead:'स्थिर कौन उपयोग कर रहा है?', homeSub:'किसी कामगार को चुनें और उनका वित्तीय मज़बूती डैशबोर्ड खोलें।', homeNote:'स्थिर आय का प्रमाण जाँचता है, वित्तीय मज़बूती आँकता है, नकदी संकट से पहले चेतावनी देता है, और आपात स्थिति में कर्ज़ से पहले मुफ़्त सरकारी कवर तक पहुँचाता है।',
+       bands:{critical:'गंभीर',fragile:'कमज़ोर',building:'बनते हुए',resilient:'मज़बूत'}, alerts:'चेतावनी', workers:'कामगार',
+       resilience:'मज़बूती स्कोर', runwayLine:'आपका पैसा चलेगा', days:'दिन', income12:'आय · पिछले 12 हफ़्ते', weeklyAvg:'साप्ताहिक औसत',
+       subScores:'स्कोर किससे बदलता है', sRunway:'टिकाव', sSavings:'बचत', sStability:'स्थिरता', sCoverage:'कवरेज',
+       obligations:'मासिक ज़िम्मेदारियाँ', essential:'ज़रूरी (किराया, खाना, ईंधन)', debtService:'कर्ज़ की किस्त', openAlerts:'खुली चेतावनियाँ', viewAll:'सभी देखें',
+       nav:{ submit:'आय जमा करें', advance:'एडवांस माँगें', savings:'बचत', income:'आय इतिहास', crisis:'मेरी आपात स्थिति है', entitle:'मुफ़्त सरकारी कवर' } },
+};
+
+const WORKERS = [
+  { id:'w1', name:'Murugan S.', occ:{en:'Delivery rider',ta:'டெலிவரி ரைடர்',hi:'डिलीवरी राइडर'}, city:{en:'Chennai',ta:'சென்னை',hi:'चेन्नई'}, score:34, band:'critical', openAlerts:3, runway:6 },
+  { id:'w2', name:'Lakshmi R.', occ:{en:'Tailor',ta:'தையல்காரர்',hi:'दर्ज़ी'}, city:{en:'Coimbatore',ta:'கோயம்புத்தூர்',hi:'कोयंबटूर'}, score:58, band:'fragile', openAlerts:1, runway:19 },
+  { id:'w3', name:'Arun Kumar', occ:{en:'Freelance designer',ta:'ஃப்ரீலான்ஸ் வடிவமைப்பாளர்',hi:'फ्रीलांस डिज़ाइनर'}, city:{en:'Madurai',ta:'மதுரை',hi:'मदुरै'}, score:76, band:'resilient', openAlerts:0, runway:47 },
+];
+
+const DETAIL = {
+  w1: { weekly:[4200,3800,4100,2600,3900,2200,2400,1800,2100,1500,1700,1200],
+    sub:{ runway:12, savings:8, stability:41, coverage:22 },
+    obl:{ essential:9800, debt:7400 }, income:2900, savings:640,
+    note:{en:'Two weeks of falling payouts and a moneylender EMI at 60% APR.',ta:'இரண்டு வாரம் வருமானம் குறைவு, 60% வட்டியில் கடன் தவணை.',hi:'दो हफ़्ते घटती कमाई और 60% ब्याज पर साहूकार की EMI।'} },
+  w2: { weekly:[5200,4900,5400,5100,4700,5600,5200,4400,5800,5100,4900,5300],
+    sub:{ runway:46, savings:52, stability:71, coverage:58 },
+    obl:{ essential:11200, debt:3200 }, income:5100, savings:8400,
+    note:{en:'Steady stitching orders, but no buffer for a slow month.',ta:'நிலையான தையல் ஆர்டர்கள், ஆனால் மெதுவான மாதத்திற்கு சேமிப்பு இல்லை.',hi:'सिलाई के ऑर्डर स्थिर, पर सुस्त महीने के लिए बचत नहीं।'} },
+  w3: { weekly:[8600,9200,7400,11200,8800,9600,10400,8200,12100,9800,10600,11400],
+    sub:{ runway:82, savings:74, stability:68, coverage:79 },
+    obl:{ essential:18400, debt:6200 }, income:10600, savings:74500,
+    note:{en:'Healthy runway. One invoice is 41 days late with a large buyer.',ta:'ஆரோக்கியமான நிலை. ஒரு பெரிய வாடிக்கையாளரின் பில் 41 நாட்கள் தாமதம்.',hi:'स्थिति मज़बूत। एक बड़े खरीदार का इनवॉइस 41 दिन देर से।'} },
+};
+
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+const ALERTS = {
+  w1: [
+    { code:'debt_spiral', severity:'critical', title:'Moneylender debt at 60% APR', detail:'₹7,400 a month is going to debt service on a ₹40,000 hand loan. At this rate the principal never falls.',
+      ladder:['Refinance at 24% APR through a partner NBFC — saves ₹2,100/month','Pause the discretionary savings sweep for 2 weeks','Sthir will refuse new advances until debt service drops below 25% of income'] },
+    { code:'runway_critical', severity:'critical', title:'6 days of money left', detail:'Rent of ₹6,500 is due on 12 Sep. Current balance and expected payouts do not cover it.',
+      ladder:['Claim ₹2,000 free fuel subsidy you already qualify for','Take a ₹1,800 advance against the verified Swiggy payout','Talk to your landlord about a 5-day extension — draft message ready'] },
+    { code:'income_drop', severity:'warning', title:'Income down 62% over 4 weeks', detail:'Weekly payouts fell from ₹4,100 to ₹1,200. Two platforms cut your slot allocation.',
+      ladder:['Add a second platform — Zepto is hiring in your pin code','Shift 4 hours to the 7–11pm surge window'] },
+  ],
+  w2: [
+    { code:'payout_overdue', severity:'warning', title:'Boutique payment 18 days late', detail:'₹12,400 from Anandi Boutique is past its agreed 15-day term.',
+      ladder:['Send the MSMED Act s.16 reminder — interest is accruing at 13.35%','Flag this buyer so other tailors see the delay','Request an advance against the verified invoice'] },
+  ],
+  w3: [
+    { code:'payout_overdue', severity:'warning', title:'Invoice 41 days late', detail:'₹68,000 from Kovai Textiles Pvt Ltd. Statutory interest and a s.43B(h) tax disallowance now apply to the buyer.',
+      ladder:['Send the statutory exposure note — ₹3,142 interest accrued','Request an advance against the invoice at 1.2% for 30 days'] },
+  ],
+};
+
+const TIER = {
+  A: { color:'#15803d', tint:'rgba(21,128,61,.14)', ring:'rgba(21,128,61,.32)', note:{en:'Crypto-verified payout',ta:'சான்றளிக்கப்பட்ட வரவு',hi:'क्रिप्टो-सत्यापित भुगतान'} },
+  B: { color:'#0f766e', tint:'rgba(15,118,110,.14)', ring:'rgba(15,118,110,.32)', note:{en:'Plausible reference match',ta:'நம்பத்தகுந்த குறிப்பு பொருத்தம்',hi:'संभाव्य संदर्भ मिलान'} },
+  C: { color:'#b45309', tint:'rgba(217,119,6,.13)', ring:'rgba(217,119,6,.32)', note:{en:'AI-read from photo',ta:'படத்திலிருந்து AI படித்தது',hi:'फ़ोटो से AI द्वारा पढ़ा'} },
+};
+
+const INCOME = {
+  w1: [
+    { id:'i101', week:'Week of 31 Aug', date:'02 Sep', kind:'gig_payout', src:'Swiggy', gross:1200, tier:'A', status:'settled' },
+    { id:'i102', week:'Week of 31 Aug', date:'01 Sep', kind:'cash_gig', src:'Local shop delivery', gross:450, tier:'C', status:'settled' },
+    { id:'i103', week:'Week of 24 Aug', date:'27 Aug', kind:'gig_payout', src:'Zomato', gross:1700, tier:'A', status:'settled' },
+    { id:'i104', week:'Week of 17 Aug', date:'19 Aug', kind:'gig_payout', src:'Swiggy', gross:1500, tier:'A', status:'settled' },
+    { id:'i105', week:'Week of 10 Aug', date:'12 Aug', kind:'cash_gig', src:'Wedding catering run', gross:2100, tier:'C', status:'settled' },
+  ],
+  w2: [
+    { id:'i201', week:'Week of 31 Aug', date:'02 Sep', kind:'invoice', src:'Anandi Boutique', gross:12400, tier:'B', status:'overdue' },
+    { id:'i202', week:'Week of 31 Aug', date:'30 Aug', kind:'cash_gig', src:'Alteration walk-ins', gross:1800, tier:'C', status:'settled' },
+    { id:'i203', week:'Week of 24 Aug', date:'25 Aug', kind:'invoice', src:'Sri Ram Tailors', gross:5300, tier:'B', status:'settled' },
+    { id:'i204', week:'Week of 17 Aug', date:'18 Aug', kind:'invoice', src:'Anandi Boutique', gross:4900, tier:'B', status:'settled' },
+  ],
+  w3: [
+    { id:'i301', week:'Week of 31 Aug', date:'01 Sep', kind:'invoice', src:'Kovai Textiles Pvt Ltd', gross:68000, tier:'B', status:'overdue' },
+    { id:'i302', week:'Week of 24 Aug', date:'26 Aug', kind:'invoice', src:'Nila Studio', gross:11400, tier:'A', status:'settled' },
+    { id:'i303', week:'Week of 17 Aug', date:'20 Aug', kind:'salary', src:'Retainer · Vaan Media', gross:25000, tier:'A', status:'settled' },
+    { id:'i304', week:'Week of 10 Aug', date:'13 Aug', kind:'invoice', src:'Freelance · logo set', gross:9800, tier:'C', status:'settled' },
+  ],
+};
+
+const SAVINGS = {
+  w1: { balance:640, target:5000, ledger:[
+    { date:'02 Sep', label:'Sweep from Swiggy payout', amt:120, dir:'in' },
+    { date:'28 Aug', label:'Drawdown — medicine', amt:-800, dir:'out' },
+    { date:'27 Aug', label:'Sweep from Zomato payout', amt:170, dir:'in' },
+    { date:'19 Aug', label:'Sweep from Swiggy payout', amt:150, dir:'in' } ] },
+  w2: { balance:8400, target:20000, ledger:[
+    { date:'02 Sep', label:'Sweep from walk-in cash', amt:400, dir:'in' },
+    { date:'25 Aug', label:'Sweep from invoice settlement', amt:1060, dir:'in' },
+    { date:'21 Aug', label:'Drawdown — machine repair', amt:-2200, dir:'out' },
+    { date:'18 Aug', label:'Sweep from invoice settlement', amt:980, dir:'in' } ] },
+  w3: { balance:74500, target:120000, ledger:[
+    { date:'01 Sep', label:'Sweep from retainer', amt:5000, dir:'in' },
+    { date:'26 Aug', label:'Sweep from Nila Studio', amt:2280, dir:'in' },
+    { date:'20 Aug', label:'Quarterly tax set-aside', amt:-9000, dir:'out' },
+    { date:'13 Aug', label:'Sweep from logo set', amt:1960, dir:'in' } ] },
+};
+
+const SEV = {
+  critical: { color:'#c2402c', tint:'rgba(194,64,44,.15)', ring:'rgba(194,64,44,.4)', label:{en:'Critical',ta:'மிக அவசரம்',hi:'गंभीर'} },
+  warning:  { color:'#b45309', tint:'rgba(217,119,6,.13)', ring:'rgba(217,119,6,.35)', label:{en:'Warning',ta:'எச்சரிக்கை',hi:'चेतावनी'} },
+};
+
+const SAMPLES = [
+  { id:'s1', kind:'gig_payout', src:'Swiggy weekly payout', gross:1800, ref:'SWG-2026-36-88421', tier:'A', ph:'payout screenshot',
+    checks:['Payout reference matched against platform settlement API','Amount and date consistent with 11 prior payouts','Device and account fingerprint unchanged'] },
+  { id:'s2', kind:'invoice', src:'Anandi Boutique · invoice #214', gross:12400, ref:'INV-214', tier:'B', ph:'invoice photo',
+    checks:['GSTIN of buyer resolved and active','Invoice number sequence plausible for this buyer','Perceptual hash unique — not a re-photographed invoice'] },
+  { id:'s3', kind:'cash_gig', src:'Cash catering run', gross:2100, ref:'—', tier:'C', ph:'handwritten receipt',
+    checks:['Amount read from photo by OCR at 91% confidence','No verifiable counterparty — capped at tier C','Contributes at 40% weight to the stability sub-score'] },
+];
+
+const SCHEMES = [
+  { name:'PM Suraksha Bima Yojana (PMSBY)', cover:200000, premium:'₹20/year', tag:'accident', note:{en:'Accidental death & disability cover.',ta:'விபத்து இறப்பு மற்றும் இயலாமை காப்பீடு.',hi:'दुर्घटना मृत्यु व विकलांगता कवर।'} },
+  { name:'Ayushman Bharat PM-JAY', cover:500000, premium:'Free', tag:'hospital', note:{en:'Cashless hospitalisation at empanelled hospitals.',ta:'பட்டியலிடப்பட்ட மருத்துவமனைகளில் இலவச சிகிச்சை.',hi:'सूचीबद्ध अस्पतालों में कैशलेस इलाज।'} },
+  { name:'e-Shram registered worker benefits', cover:200000, premium:'Free', tag:'accident', note:{en:'Unorganised-worker accident cover on registration.',ta:'பதிவு செய்த அமைப்புசாரா தொழிலாளர் காப்பீடு.',hi:'असंगठित कामगार पंजीकरण पर दुर्घटना कवर।'} },
+  { name:'TN Chief Minister’s Health Insurance', cover:500000, premium:'Free', tag:'hospital', note:{en:'State scheme for families under ₹1.2L annual income.',ta:'₹1.2 லட்சத்திற்கு கீழ் வருமானம் உள்ள குடும்பங்களுக்கு.',hi:'₹1.2 लाख से कम आय वाले परिवारों के लिए।'} },
+];
+
+const CRISIS = {
+  accident: { type:'Road accident — two-wheeler', vendor:'Govt General Hospital, Chennai', amount:35000, outcome:'covered_by_entitlement',
+    scheme:'PMSBY + e-Shram accident cover', ph:'hospital estimate photo',
+    read:['Document read as a hospital treatment estimate','Injury category matches PMSBY accident definition','Worker is e-Shram registered since Mar 2024'] },
+  hospital: { type:'Emergency hospitalisation — dengue', vendor:'Apollo Speciality, Madurai', amount:48000, outcome:'covered_by_entitlement',
+    scheme:'Ayushman Bharat PM-JAY', ph:'admission slip photo',
+    read:['Admission slip parsed — inpatient, 4 days','Hospital is PM-JAY empanelled','Family income band qualifies for cashless treatment'] },
+  breakdown: { type:'Vehicle breakdown — clutch assembly', vendor:'Sri Balaji Auto Works', amount:4200, outcome:'emergency_advance_to_vendor',
+    scheme:null, ph:'mechanic quote photo',
+    read:['Quote read from garage letterhead','Vehicle is the worker’s declared income asset','No government scheme covers vehicle repair'] },
+};
+
+class Component extends DCLogic {
+  state = { lang:'en', screen:'home', workerId:null, stack:[],
+    sSample:null, sStep:'pick', aAmt:null, aStep:'ask', aClarify:'', cCase:null, cStep:'pick' };
+
+  go = (screen, workerId) => this.setState(s => ({
+    screen, workerId: workerId || s.workerId, stack:[...s.stack, { screen:s.screen, workerId:s.workerId }],
+  }));
+  back = () => this.setState(s => {
+    const prev = s.stack[s.stack.length-1] || { screen:'home', workerId:null };
+    return { screen:prev.screen, workerId:prev.workerId, stack:s.stack.slice(0,-1) };
+  });
+  setLang = lang => this.setState({ lang });
+
+  worker() { return WORKERS.find(w => w.id === this.state.workerId) || WORKERS[0]; }
+
+  componentDidMount() {
+    const lang = this.props.startLang;
+    const wid = this.props.startWorker;
+    if ((lang && lang !== this.state.lang) || wid) this.setState({ lang: lang || this.state.lang, workerId: wid || this.state.workerId });
+  }
+
+  pickSample = id => {
+    this.setState({ sSample:id, sStep:'verifying' });
+    setTimeout(() => this.setState({ sStep:'result' }), this.props.verifyDelayMs ?? 1500);
+  };
+  pickCrisis = key => {
+    this.setState({ cCase:key, cStep:'assessing' });
+    setTimeout(() => this.setState({ cStep:'result' }), 1600);
+  };
+  decide = () => this.setState({ aStep:'decided' });
+
+  flowVals(w, d, lang) {
+    const S = this.state;
+    const smp = SAMPLES.find(s => s.id === S.sSample);
+    const delta = smp ? ({ A:6, B:4, C:2 })[smp.tier] : 0;
+    const after = Math.min(100, w.score + delta);
+    const tier = smp ? TIER[smp.tier] : TIER.A;
+
+    // advance decision by worker
+    const amt = S.aAmt != null ? S.aAmt : ({ w1:3000, w2:6000, w3:20000 })[w.id];
+    let decision = w.id === 'w1' ? 'refused' : (w.id === 'w2' && S.aStep !== 'clarified') ? 'clarify' : 'approved';
+    const alloc = [
+      { label:{en:'Savings sweep',ta:'சேமிப்பு',hi:'बचत'}[lang], amt: Math.round(amt*0.1), color:'#15803d' },
+      { label:{en:'Rent set-aside',ta:'வாடகை',hi:'किराया'}[lang], amt: Math.round(amt*0.4), color:'#0f766e' },
+      { label:{en:'EMI due 10 Sep',ta:'தவணை · செப் 10',hi:'EMI · 10 सित'}[lang], amt: Math.round(amt*0.2), color:'#b45309' },
+      { label:{en:'Spendable now',ta:'இப்போது செலவிட',hi:'अब खर्च योग्य'}[lang], amt: amt - Math.round(amt*0.1) - Math.round(amt*0.4) - Math.round(amt*0.2), color:'#334155' },
+    ];
+    const cc = S.cCase ? CRISIS[S.cCase] : null;
+
+    return {
+      isSubmit: this.state.screen === 'submit',
+      sPick: S.sStep === 'pick', sVerifying: S.sStep === 'verifying', sResult: S.sStep === 'result',
+      samples: SAMPLES.map(s => ({ ...s, grossFmt:fmt(s.gross), pick:()=>this.pickSample(s.id) })),
+      smpSrc: smp ? smp.src : '', smpGross: smp ? fmt(smp.gross) : '', smpRef: smp ? smp.ref : '', smpPh: smp ? smp.ph : '',
+      smpTier: smp ? smp.tier : '', smpTierColor:tier.color, smpTierTint:tier.tint, smpTierRing:tier.ring, smpTierNote: smp ? tier.note[lang] : '',
+      smpChecks: smp ? smp.checks.map(c => ({ c })) : [],
+      scoreBefore: w.score, scoreAfter: after, deltaLabel: '+' + delta,
+      afterWidth: after + '%', beforeWidth: w.score + '%',
+      resetSubmit: () => this.setState({ sStep:'pick', sSample:null }),
+      submitAgain: () => this.setState({ sStep:'pick', sSample:null }),
+      goAdvanceFromSubmit: () => { this.setState({ sStep:'pick', sSample:null }); this.go('advance'); },
+
+      isAdvance: this.state.screen === 'advance',
+      aAsk: S.aStep === 'ask', aDecided: S.aStep !== 'ask',
+      amtFmt: fmt(amt), amtRaw: amt,
+      amtOptions: [1800, 3000, 6000, 20000].map(v => ({ v, label:fmt(v), pick:()=>this.setState({ aAmt:v }), on: v === amt,
+        bg: v === amt ? '#0f766e' : 'rgba(15,23,42,.05)', fg: v === amt ? '#FFFFFF' : 'rgba(15,23,42,.75)' })),
+      decide: this.decide,
+      resetAdvance: () => this.setState({ aStep:'ask' }),
+      isApproved: decision === 'approved', isRefused: decision === 'refused', isClarify: decision === 'clarify',
+      alloc: alloc.map(a => ({ ...a, amtFmt:fmt(a.amt), pct: Math.round(a.amt/amt*100) + '%' })),
+      vpa: 'sthir.' + w.name.split(' ')[0].toLowerCase() + '@upi',
+      clarifyQ: { en:'Has invoice #214 already been financed anywhere else?', ta:'இன்வாய்ஸ் #214 ஏற்கனவே வேறு எங்காவது கடனாகப் பெறப்பட்டதா?', hi:'क्या इनवॉइस #214 पहले कहीं और से फ़ाइनेंस हुआ है?' }[lang],
+      clarifyNo: () => this.setState({ aStep:'clarified' }),
+      clarifyYes: () => this.setState({ aStep:'clarified' }),
+
+      isCrisis: this.state.screen === 'crisis',
+      cPick: S.cStep === 'pick', cAssessing: S.cStep === 'assessing', cResult: S.cStep === 'result',
+      crisisCases: Object.keys(CRISIS).map(k => ({ key:k, label:CRISIS[k].type, amt:fmt(CRISIS[k].amount), ph:CRISIS[k].ph, pick:()=>this.pickCrisis(k) })),
+      cc, ccType: cc ? cc.type : '', ccVendor: cc ? cc.vendor : '', ccAmount: cc ? fmt(cc.amount) : '',
+      ccScheme: cc ? (cc.scheme || '') : '', ccPh: cc ? cc.ph : '',
+      ccRead: cc ? cc.read.map(r => ({ r })) : [],
+      ccCovered: cc ? cc.outcome === 'covered_by_entitlement' : false,
+      ccVendorPaid: cc ? cc.outcome === 'emergency_advance_to_vendor' : false,
+      resetCrisis: () => this.setState({ cStep:'pick', cCase:null }),
+
+      isEntitlements: this.state.screen === 'entitlements',
+      schemes: SCHEMES.map(s => ({ ...s, coverFmt:fmt(s.cover), note:s.note[lang] })),
+      offsetCovered: cc && cc.outcome === 'covered_by_entitlement' ? fmt(cc.amount) : null,
+      hasOffset: !!(cc && cc.outcome === 'covered_by_entitlement'),
+    };
+  }
+
+  renderVals() {
+    const { lang, screen } = this.state;
+    const t = STR[lang];
+    const pill = on => ({ bg: on ? '#0f766e' : 'transparent', fg: on ? '#FFFFFF' : 'rgba(15,23,42,.55)' });
+    const en = pill(lang==='en'), ta = pill(lang==='ta'), hi = pill(lang==='hi');
+    const w = this.worker();
+    const d = DETAIL[w.id];
+    const b = BAND[w.band];
+    const titles = {
+      home:{ title:'Sthir', sub:t.workers },
+      dashboard:{ title:w.name, sub:w.occ[lang] + ' · ' + w.city[lang] },
+      alerts:{ title:t.openAlerts, sub:w.name },
+      income:{ title:t.nav.income, sub:w.name },
+      savings:{ title:t.nav.savings, sub:w.name },
+      submit:{ title:t.nav.submit, sub:w.name },
+      advance:{ title:t.nav.advance, sub:w.name },
+      crisis:{ title:t.nav.crisis, sub:w.name },
+      entitlements:{ title:t.nav.entitle, sub:w.name },
+    };
+    const head = titles[screen] || { title:w.name, sub:'' };
+    const peak = Math.max(...d.weekly);
+    const oblTotal = d.obl.essential + d.obl.debt;
+
+    return {
+      w, worker:w, wName:w.name, score:w.score, bandColor:b.color, bandTint:b.tint, bandRing:b.ring,
+      bandLabel:t.bands[w.band], scorePct: w.score + '%',
+      gaugeBg: 'conic-gradient(from 180deg, ' + b.color + ' 0 ' + w.score + '%, rgba(15,23,42,.09) ' + w.score + '% 100%)',
+      alertCount: w.openAlerts, hasAlerts: w.openAlerts > 0,
+      runway:w.runway, workerNote:d.note[lang],
+      weeklyAvg: fmt(d.income), savingsBal: fmt(d.savings),
+      bars: d.weekly.map((v,i) => ({ h: Math.max(8, Math.round(v/peak*100)) + '%', dim: i < 8 ? .45 : 1 })),
+      subs: [
+        { label:t.sRunway, val:d.sub.runway, pct:d.sub.runway+'%', color:d.sub.runway<30?'#c2402c':d.sub.runway<60?'#b45309':'#15803d' },
+        { label:t.sSavings, val:d.sub.savings, pct:d.sub.savings+'%', color:d.sub.savings<30?'#c2402c':d.sub.savings<60?'#b45309':'#15803d' },
+        { label:t.sStability, val:d.sub.stability, pct:d.sub.stability+'%', color:d.sub.stability<30?'#c2402c':d.sub.stability<60?'#b45309':'#15803d' },
+        { label:t.sCoverage, val:d.sub.coverage, pct:d.sub.coverage+'%', color:d.sub.coverage<30?'#c2402c':d.sub.coverage<60?'#b45309':'#15803d' },
+      ],
+      oblEssential: fmt(d.obl.essential), oblDebt: fmt(d.obl.debt), oblTotal: fmt(oblTotal),
+      oblEssPct: Math.round(d.obl.essential/oblTotal*100)+'%', oblDebtPct: Math.round(d.obl.debt/oblTotal*100)+'%',
+      isDashboard: screen === 'dashboard',
+      isAlerts: screen === 'alerts',
+      alertsHead: { en:'Early warning', ta:'முன் எச்சரிக்கை', hi:'पूर्व चेतावनी' }[lang],
+      alertsSub: { en:'Graded actions, cheapest and safest first.', ta:'பாதுகாப்பான, மலிவான நடவடிக்கைகள் முதலில்.', hi:'सुरक्षित और सस्ते उपाय पहले।' }[lang],
+      ladderLabel: { en:'What to do, in order', ta:'என்ன செய்ய வேண்டும், வரிசையில்', hi:'क्या करें, क्रम में' }[lang],
+      noAlerts: { en:'No open alerts. Runway is healthy.', ta:'எச்சரிக்கைகள் இல்லை. நிலை ஆரோக்கியம்.', hi:'कोई चेतावनी नहीं। स्थिति ठीक है।' }[lang],
+      alerts: (ALERTS[w.id] || []).map(a => {
+        const s = SEV[a.severity];
+        return { ...a, sevColor:s.color, sevTint:s.tint, sevRing:s.ring, sevLabel:s.label[lang],
+          isCritical: a.severity === 'critical',
+          steps: a.ladder.map((step,i) => ({ step, n:i+1 })) };
+      }),
+      noneOpen: (ALERTS[w.id] || []).length === 0,
+
+      ...this.flowVals(w, d, lang),
+      isIncome: screen === 'income',
+      incomeHead: { en:'Income history', ta:'வருமான வரலாறு', hi:'आय इतिहास' }[lang],
+      incomeSub: { en:'Every rupee, with how it was verified.', ta:'ஒவ்வொரு ரூபாயும், எப்படி சரிபார்க்கப்பட்டது என்பதுடன்.', hi:'हर रुपया, उसकी जाँच के साथ।' }[lang],
+      verifiedLabel: { en:'Verification', ta:'சரிபார்ப்பு', hi:'सत्यापन' }[lang],
+      incomeGroups: Object.values((INCOME[w.id]||[]).reduce((acc,e) => {
+        const tr = TIER[e.tier];
+        (acc[e.week] = acc[e.week] || { week:e.week, total:0, rows:[] });
+        acc[e.week].rows.push({ ...e, grossFmt:fmt(e.gross), tierColor:tr.color, tierTint:tr.tint, tierRing:tr.ring, tierNote:tr.note[lang],
+          isOverdue: e.status === 'overdue', statusLabel: e.status });
+        acc[e.week].total += e.gross;
+        return acc;
+      }, {})).map(g => ({ ...g, totalFmt: fmt(g.total) })),
+
+      isSavings: screen === 'savings',
+      savingsHead: { en:'Savings', ta:'சேமிப்பு', hi:'बचत' }[lang],
+      savingsSub: { en:'Swept automatically from each verified payout.', ta:'ஒவ்வொரு சரிபார்க்கப்பட்ட வரவிலிருந்தும் தானாக சேமிக்கப்படுகிறது.', hi:'हर सत्यापित भुगतान से अपने-आप जमा।' }[lang],
+      savBalance: fmt(SAVINGS[w.id].balance),
+      savTarget: fmt(SAVINGS[w.id].target),
+      savPct: Math.round(SAVINGS[w.id].balance / SAVINGS[w.id].target * 100) + '%',
+      savTargetLabel: { en:'of your 3-month cushion target', ta:'3 மாத பாதுகாப்பு இலக்கில்', hi:'3-महीने के कुशन लक्ष्य का' }[lang],
+      ledgerLabel: { en:'Sweeps and drawdowns', ta:'சேமிப்பு மற்றும் எடுப்பு', hi:'जमा और निकासी' }[lang],
+      ledger: SAVINGS[w.id].ledger.map(r => ({ ...r,
+        amtFmt: (r.dir==='in' ? '+' : '−') + fmt(Math.abs(r.amt)),
+        color: r.dir==='in' ? '#15803d' : '#c2402c',
+        tint: r.dir==='in' ? 'rgba(21,128,61,.12)' : 'rgba(194,64,44,.12)',
+        glyph: r.dir==='in' ? '↑' : '↓' })),
+      goSubmit:()=>this.go('submit'), goAdvance:()=>this.go('advance'), goSavings:()=>this.go('savings'),
+      goIncome:()=>this.go('income'), goCrisis:()=>this.go('crisis'), goEntitle:()=>this.go('entitlements'),
+      goAlerts:()=>this.go('alerts'),
+      t, lang, screen,
+      isHome: screen === 'home',
+      showBack: screen !== 'home',
+      screenTitle: head.title, screenSub: head.sub,
+      enBg:en.bg, enFg:en.fg, taBg:ta.bg, taFg:ta.fg, hiBg:hi.bg, hiFg:hi.fg,
+      setEn:()=>this.setLang('en'), setTa:()=>this.setLang('ta'), setHi:()=>this.setLang('hi'),
+      back: this.back,
+      reset: () => this.setState({ screen:'home', workerId:null, stack:[] }),
+      workers: WORKERS.map(w => {
+        const b = BAND[w.band];
+        return {
+          ...w, occ:w.occ[lang], city:w.city[lang],
+          color:b.color, tint:b.tint, ring:b.ring,
+          pct: w.score + '%', bandLabel: t.bands[w.band],
+          hasAlerts: w.openAlerts > 0,
+          alertLabel: w.openAlerts + ' ' + (w.openAlerts === 1 && lang === 'en' ? 'alert' : t.alerts),
+          open: () => this.go('dashboard', w.id),
+        };
+      }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
