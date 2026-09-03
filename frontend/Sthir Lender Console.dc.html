@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; font-family:'IBM Plex Sans',system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+  body[data-sthir-theme="light"] {
+    --bg:#f4f6f5; --panel:#ffffff; --panel2:#f8fafa; --line:#dde5e3; --line2:#e9efed;
+    --fg:#0f172a; --fg2:#475569; --fg3:#94a3b8; --accent:#0f766e; --accentSoft:#e0f0ee;
+    --pos:#15803d; --posSoft:#e3f3e8; --warn:#b45309; --warnSoft:#fbf0dc; --neg:#c2402c; --negSoft:#fbe9e5;
+    --info:#0d9488; --infoSoft:#e0f0ee; --shadow:0 1px 2px rgba(15,23,42,.06), 0 8px 24px -18px rgba(15,23,42,.28);
+  }
+  body[data-sthir-theme="dark"] {
+    --bg:#0c1211; --panel:#141c1b; --panel2:#111817; --line:#243230; --line2:#1c2827;
+    --fg:#e2e8f0; --fg2:#94a3b8; --fg3:#64748b; --accent:#2dd4bf; --accentSoft:#10302c;
+    --pos:#34d399; --posSoft:#0f2a1e; --warn:#fbbf24; --warnSoft:#2b2113; --neg:#f87171; --negSoft:#2c1715;
+    --info:#2dd4bf; --infoSoft:#10302c; --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 40px -26px rgba(0,0,0,.9);
+  }
+  a { color:var(--accent); } a:hover { color:var(--pos); }
+  @keyframes sthirIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;background:var(--bg);color:var(--fg)">
+
+  <aside style="flex:none;width:236px;border-right:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:20px 18px;border-bottom:1px solid var(--line)">
+      <a href="Sthir%20Portals.dc.html" style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--fg);text-decoration:none">← Sthir</a>
+      <div style="margin-top:2px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3)">Lender console</div>
+    </div>
+    <nav style="flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+        <button onClick="{{ n.go }}" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;cursor:pointer;padding:9px 11px;border-radius:8px;border:1px solid {{ n.border }};background:{{ n.bg }};color:{{ n.fg }};font:500 13px/1.2 inherit">
+          <span style="flex:1">{{ n.label }}</span>
+          <sc-if value="{{ n.hasCount }}" hint-placeholder-val="{{ true }}">
+            <span style="flex:none;padding:1px 6px;border-radius:20px;background:var(--negSoft);color:var(--neg);font:600 10.5px/1.5 'IBM Plex Mono',monospace">{{ n.count }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="padding:12px 14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px">
+      <button onClick="{{ toggleTheme }}" style="cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg2);font:500 12px inherit;text-align:left">{{ themeLabel }}</button>
+      <button onClick="{{ resetDemo }}" style="cursor:pointer;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg2);font:500 12px inherit;text-align:left">Reset demo data</button>
+      <div style="font:400 10.5px/1.5 'IBM Plex Mono',monospace;color:var(--fg3)">Demo date 2026-09-03</div>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+      <div>
+        <h1 style="margin:0;font-size:17px;font-weight:700;letter-spacing:-.015em">{{ pageTitle }}</h1>
+        <div style="margin-top:2px;font-size:12px;color:var(--fg2)">{{ pageSub }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="padding:5px 10px;border-radius:6px;background:var(--warnSoft);border:1px solid var(--warn);font:600 11px/1.4 'IBM Plex Mono',monospace;color:var(--warn)">PROTOTYPE · simulated funds · mock verification keys</span>
+      </div>
+    </header>
+
+    <div style="flex:1;padding:24px;animation:sthirIn .25s ease both">
+      <sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+              <div style="padding:16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+                <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3)">{{ k.label }}</div>
+                <div style="margin-top:10px;font:700 27px/1 'IBM Plex Sans',sans-serif;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:{{ k.color }}">{{ k.value }}</div>
+                <div style="margin-top:7px;font-size:11.5px;color:var(--fg2)">{{ k.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.15fr .85fr;gap:16px">
+            <div style="padding:18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <div style="font-size:13px;font-weight:700">Resilience band distribution</div>
+                <div style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">n = {{ totalWorkers }}</div>
+              </div>
+              <div style="margin-top:20px;display:flex;align-items:flex-end;gap:18px;height:190px;padding:0 6px;border-bottom:1px solid var(--line)">
+                <sc-for list="{{ bands }}" as="b" hint-placeholder-count="4">
+                  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:8px">
+                    <div style="font:600 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:{{ b.color }}">{{ b.count }}</div>
+                    <div style="width:100%;height:{{ b.h }};border-radius:5px 5px 0 0;background:{{ b.color }};opacity:.9"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:18px;padding:10px 6px 0">
+                <sc-for list="{{ bands }}" as="b" hint-placeholder-count="4">
+                  <div style="flex:1;text-align:center;font-size:11.5px;font-weight:600;color:var(--fg2)">{{ b.label }}<span style="display:block;font:400 10.5px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ b.pct }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="padding:18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+              <div style="font-size:13px;font-weight:700">Protective refusals · last 8 weeks</div>
+              <div style="margin-top:6px;font-size:11.5px;line-height:1.5;color:var(--fg2)">Advances the system declined to keep a borrower out of a debt spiral. Reported as a responsible-lending control.</div>
+              <div style="margin-top:18px;display:flex;align-items:flex-end;gap:7px;height:120px">
+                <sc-for list="{{ refusalBars }}" as="r" hint-placeholder-count="8">
+                  <div style="flex:1;height:{{ r.h }};border-radius:4px 4px 0 0;background:{{ r.color }}"></div>
+                </sc-for>
+              </div>
+              <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ refusalReasons }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px;font-size:12px">
+                    <span style="flex:1;color:var(--fg2)">{{ r.label }}</span>
+                    <span style="font:600 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDistress }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start">
+          <div style="border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font-size:13px;font-weight:700">Triage queue</div>
+              <div style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">173 open · showing 8</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:660px">
+                <thead>
+                  <tr style="background:var(--panel2)">
+                    <th style="text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Worker</th>
+                    <th style="text-align:left;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Top alert</th>
+                    <th style="text-align:right;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Runway</th>
+                    <th style="text-align:right;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Outstanding</th>
+                    <th style="text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Next action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ cases }}" as="c" hint-placeholder-count="8">
+                    <tr onClick="{{ c.open }}" style="cursor:pointer;background:{{ c.rowBg }};border-bottom:1px solid var(--line2)">
+                      <td style="padding:11px 14px">
+                        <div style="display:flex;align-items:center;gap:9px">
+                          <span style="flex:none;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:{{ c.sevSoft }};font:600 11px 'IBM Plex Mono',monospace;color:{{ c.bandColor }}">{{ c.score }}</span>
+                          <span>
+                            <span style="display:block;font-weight:600">{{ c.name }}</span>
+                            <span style="display:block;font-size:11px;color:var(--fg3)">{{ c.occ }} · {{ c.city }}</span>
+                          </span>
+                        </div>
+                      </td>
+                      <td style="padding:11px 10px">
+                        <span style="padding:2px 7px;border-radius:4px;background:{{ c.sevSoft }};font:500 11px 'IBM Plex Mono',monospace;color:{{ c.sevColor }}">{{ c.code }}</span>
+                      </td>
+                      <td style="padding:11px 10px;text-align:right;font:600 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:{{ c.runwayColor }}">{{ c.runway }}d</td>
+                      <td style="padding:11px 10px;text-align:right;font:500 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ c.outFmt }}</td>
+                      <td style="padding:11px 14px;color:var(--fg2)">{{ c.firstStep }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);padding:18px;position:sticky;top:92px">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="padding:2px 7px;border-radius:4px;background:{{ selCase.sevSoft }};font:600 10.5px 'IBM Plex Mono',monospace;color:{{ selCase.sevColor }}">{{ selCase.code }}</span>
+              <span style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">case {{ selCase.id }}</span>
+            </div>
+            <div style="margin-top:12px;font-size:17px;font-weight:700;letter-spacing:-.015em">{{ selCase.name }}</div>
+            <div style="margin-top:2px;font-size:12px;color:var(--fg2)">{{ selCase.occ }} · {{ selCase.city }}</div>
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <div style="padding:11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                <div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Score</div>
+                <div style="margin-top:4px;font:700 18px 'IBM Plex Mono',monospace;color:{{ selCase.bandColor }}">{{ selCase.score }}</div>
+              </div>
+              <div style="padding:11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                <div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Runway</div>
+                <div style="margin-top:4px;font:700 18px 'IBM Plex Mono',monospace">{{ selCase.runway }}d</div>
+              </div>
+              <div style="padding:11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                <div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Exposure</div>
+                <div style="margin-top:4px;font:700 15px 'IBM Plex Mono',monospace">{{ selCase.outFmt }}</div>
+              </div>
+            </div>
+            <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Recommended intervention ladder</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ selCase.steps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;gap:9px;padding:10px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2);font-size:12.5px;line-height:1.45">
+                  <span style="flex:none;font:600 11px 'IBM Plex Mono',monospace;color:var(--accent)">{{ s.n }}</span>
+                  <span style="flex:1;color:var(--fg2);text-wrap:pretty">{{ s.s }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:8px">
+              <button onClick="{{ goWorker }}" style="flex:1;cursor:pointer;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:600 12px inherit">Open worker</button>
+              <button onClick="{{ goExposure }}" style="flex:1;cursor:pointer;padding:10px;border-radius:8px;border:1px solid var(--accent);background:var(--accentSoft);color:var(--accent);font:600 12px inherit">Statutory exposure</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSources }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:13px;font-weight:700">Who pays your borrowers, and how reliably</div>
+            <div style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">2 flags = amber · reputation is shared across workers</div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:820px">
+              <thead>
+                <tr style="background:var(--panel2)">
+                  <th style="text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Source</th>
+                  <th style="text-align:left;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Type</th>
+                  <th style="text-align:center;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Grade</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Avg days late</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Workers</th>
+                  <th style="text-align:center;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Flags</th>
+                  <th style="text-align:left;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Note</th>
+                  <th style="padding:9px 14px;border-bottom:1px solid var(--line)"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ sources }}" as="s" hint-placeholder-count="7">
+                  <tr style="border-bottom:1px solid var(--line2)">
+                    <td style="padding:11px 14px;font-weight:600">{{ s.name }}</td>
+                    <td style="padding:11px 10px;color:var(--fg2)">{{ s.type }}</td>
+                    <td style="padding:11px 10px;text-align:center">
+                      <span style="display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:6px;background:{{ s.gradeSoft }};font:600 12px 'IBM Plex Mono',monospace;color:{{ s.gradeColor }}">{{ s.grade }}</span>
+                    </td>
+                    <td style="padding:11px 10px;text-align:right;font:500 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ s.lateFmt }}</td>
+                    <td style="padding:11px 10px;text-align:right;font:400 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--fg2)">{{ s.workers }}</td>
+                    <td style="padding:11px 10px;text-align:center;font:600 12px 'IBM Plex Mono',monospace;color:{{ s.flagColor }}">{{ s.flagLabel }}</td>
+                    <td style="padding:11px 10px;color:var(--fg2)">{{ s.note }}</td>
+                    <td style="padding:11px 14px;text-align:right">
+                      <button onClick="{{ s.flag }}" style="cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--fg2);font:600 11px inherit">Flag</button>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFraud }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="padding:18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font-size:13px;font-weight:700">Verification tier mix · last 30 days</div>
+              <div style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">6,803 income events</div>
+            </div>
+            <div style="margin-top:16px;display:flex;height:14px;border-radius:4px;overflow:hidden;border:1px solid var(--line2)">
+              <sc-for list="{{ tierMix }}" as="t" hint-placeholder-count="3">
+                <div style="width:{{ t.w }};background:{{ t.color }}"></div>
+              </sc-for>
+            </div>
+            <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+              <sc-for list="{{ tierMix }}" as="t" hint-placeholder-count="3">
+                <div style="padding:12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="width:9px;height:9px;border-radius:2px;background:{{ t.color }}"></span>
+                    <span style="font:600 12px 'IBM Plex Mono',monospace;color:{{ t.color }}">Tier {{ t.tier }}</span>
+                    <span style="margin-left:auto;font:600 13px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ t.pctLabel }}</span>
+                  </div>
+                  <div style="margin-top:7px;font-size:12px;color:var(--fg2)">{{ t.label }}</div>
+                  <div style="margin-top:3px;font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ t.nFmt }} events</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:.9fr 1.1fr;gap:16px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Fraud rings detected</div>
+              <sc-for list="{{ rings }}" as="r" hint-placeholder-count="3">
+                <button onClick="{{ r.open }}" style="width:100%;text-align:left;cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--line);background:{{ r.bg }};box-shadow:var(--shadow);color:var(--fg);font-family:inherit">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                    <span style="font-size:13px;font-weight:700">{{ r.label }}</span>
+                    <span style="font:600 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--neg)">{{ r.amountFmt }}</span>
+                  </div>
+                  <div style="margin-top:6px;font-size:11.5px;color:var(--fg2)">{{ r.method }} · {{ r.buyer }}</div>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="padding:18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+              <div style="font-size:13px;font-weight:700">{{ selRing.label }}</div>
+              <div style="margin-top:4px;font-size:11.5px;color:var(--fg2)">Matched evidence · {{ selRing.method }}</div>
+              <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div>
+                  <div style="aspect-ratio:4/5;border-radius:8px;border:1px solid var(--line);background:repeating-linear-gradient(135deg,var(--line2) 0 8px,var(--panel2) 8px 16px);display:flex;align-items:center;justify-content:center;font:500 10px 'IBM Plex Mono',monospace;color:var(--fg3);text-align:center;padding:8px">{{ selRing.a.ph }}</div>
+                  <div style="margin-top:7px;font:500 11.5px 'IBM Plex Mono',monospace">{{ selRing.a.id }}</div>
+                  <div style="font-size:11.5px;color:var(--fg2)">{{ selRing.a.who }}</div>
+                </div>
+                <div>
+                  <div style="aspect-ratio:4/5;border-radius:8px;border:1px solid var(--neg);background:repeating-linear-gradient(135deg,var(--line2) 0 8px,var(--panel2) 8px 16px);display:flex;align-items:center;justify-content:center;font:500 10px 'IBM Plex Mono',monospace;color:var(--fg3);text-align:center;padding:8px">{{ selRing.b.ph }}</div>
+                  <div style="margin-top:7px;font:500 11.5px 'IBM Plex Mono',monospace;color:var(--neg)">{{ selRing.b.id }}</div>
+                  <div style="font-size:11.5px;color:var(--fg2)">{{ selRing.b.who }}</div>
+                </div>
+              </div>
+              <div style="margin-top:16px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Why they were flagged</div>
+              <div style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ selRing.reasons }}" as="x" hint-placeholder-count="3">
+                  <div style="display:flex;gap:9px;font-size:12.5px;line-height:1.45;color:var(--fg2)">
+                    <span style="flex:none;color:var(--neg);font-weight:700">·</span><span style="flex:1;text-wrap:pretty">{{ x.w }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:14px;padding:11px 12px;border-radius:8px;background:var(--warnSoft);border:1px solid var(--warn);font-size:11.5px;line-height:1.5;color:var(--warn)">Demonstration of the matching mechanism on seeded data. Not a claim about any real entity.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isExposure }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start;max-width:1180px">
+          <div style="padding:20px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+            <div style="font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ exp.invoice }}</div>
+            <div style="margin-top:8px;font-size:19px;font-weight:700;letter-spacing:-.02em">Why {{ exp.buyer }} should pay on time</div>
+            <div style="margin-top:6px;font-size:12.5px;color:var(--fg2)">{{ exp.worker }} · {{ exp.amountFmt }} · due {{ exp.due }} · {{ exp.days }} days late</div>
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ exp.bullets }}" as="b" hint-placeholder-count="3">
+                <div style="display:flex;gap:10px;padding:12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2);font-size:12.5px;line-height:1.5;color:var(--fg2)">
+                  <span style="flex:none;color:var(--accent);font-weight:700">§</span><span style="flex:1;text-wrap:pretty">{{ b.p }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:20px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Buyer's exposure today</div>
+            <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--line2)">
+                <span style="font-size:12.5px;color:var(--fg2)">s.16 interest accrued<span style="display:block;font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ exp.rateNote }}</span></span>
+                <span style="font:600 17px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--warn)">{{ exp.interestFmt }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--line2)">
+                <span style="font-size:12.5px;color:var(--fg2)">s.43B(h) deduction disallowed<span style="display:block;font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">Tax deferred to the year of payment</span></span>
+                <span style="font:600 17px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:var(--neg)">{{ exp.disallowFmt }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <span style="font-size:12.5px;font-weight:600">Total cost of waiting</span>
+                <span style="font:700 22px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ exp.totalFmt }}</span>
+              </div>
+            </div>
+            <button style="margin-top:20px;width:100%;cursor:pointer;padding:11px;border-radius:8px;border:1px solid var(--accent);background:var(--accentSoft);color:var(--accent);font:600 12.5px inherit">Send statutory notice to buyer</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isActivity }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:900px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:13px;font-weight:700">Event stream</div>
+            <div style="display:flex;align-items:center;gap:7px;font:400 11px 'IBM Plex Mono',monospace;color:var(--fg3)">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--pos)"></span>live · polling 4s
+            </div>
+          </div>
+          <div style="max-height:620px;overflow-y:auto">
+            <sc-for list="{{ events }}" as="e" hint-placeholder-count="8">
+              <div style="display:flex;align-items:baseline;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line2);animation:sthirIn .3s ease both">
+                <span style="flex:none;font:400 11.5px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ e.t }}</span>
+                <span style="flex:none;width:76px;padding:2px 6px;border-radius:4px;background:{{ e.soft }};font:600 10px 'IBM Plex Mono',monospace;color:{{ e.color }};text-align:center">{{ e.label }}</span>
+                <span style="flex:1;font-size:12.5px;line-height:1.45;color:var(--fg2);text-wrap:pretty">{{ e.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isWorker }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:16px;align-items:start;max-width:1240px">
+          <div style="padding:20px;border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)">
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">{{ wk.name }}</div>
+            <div style="margin-top:3px;font-size:12.5px;color:var(--fg2)">{{ wk.occ }} · {{ wk.city }} · read-only</div>
+            <div style="margin-top:18px;display:flex;align-items:baseline;gap:10px">
+              <span style="font:700 40px 'IBM Plex Mono',monospace;letter-spacing:-.03em;color:{{ wk.bandColor }}">{{ wk.score }}</span>
+              <span style="font-size:12.5px;font-weight:600;color:{{ wk.bandColor }}">{{ wk.bandLabel }}</span>
+            </div>
+            <div style="margin-top:12px;height:8px;border-radius:4px;background:var(--line2);overflow:hidden">
+              <div style="height:100%;width:{{ wk.scorePct }};background:{{ wk.bandColor }}"></div>
+            </div>
+            <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="padding:12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                <div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Runway</div>
+                <div style="margin-top:4px;font:700 18px 'IBM Plex Mono',monospace">{{ wk.runway }} d</div>
+              </div>
+              <div style="padding:12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)">
+                <div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Outstanding</div>
+                <div style="margin-top:4px;font:700 18px 'IBM Plex Mono',monospace">{{ wk.outFmt }}</div>
+              </div>
+            </div>
+            <div style="margin-top:20px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)">Open intervention ladder</div>
+            <div style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ wk.steps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;gap:9px;font-size:12.5px;line-height:1.45;color:var(--fg2)">
+                  <span style="flex:none;font:600 11px 'IBM Plex Mono',monospace;color:var(--accent)">{{ s.n }}</span>
+                  <span style="flex:1;text-wrap:pretty">{{ s.s }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="border-radius:10px;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700">Recent verified income</div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px">
+                <thead>
+                  <tr style="background:var(--panel2)">
+                    <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Ref</th>
+                    <th style="text-align:left;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Date</th>
+                    <th style="text-align:left;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Source</th>
+                    <th style="text-align:center;padding:9px 10px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Tier</th>
+                    <th style="text-align:right;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line)">Gross</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ wkIncome }}" as="r" hint-placeholder-count="4">
+                    <tr style="border-bottom:1px solid var(--line2)">
+                      <td style="padding:11px 16px;font:400 12px 'IBM Plex Mono',monospace;color:var(--fg3)">{{ r.id }}</td>
+                      <td style="padding:11px 10px;color:var(--fg2)">{{ r.date }}</td>
+                      <td style="padding:11px 10px;font-weight:500">{{ r.src }}</td>
+                      <td style="padding:11px 10px;text-align:center;font:600 12px 'IBM Plex Mono',monospace;color:{{ r.tierColor }}">{{ r.tier }}</td>
+                      <td style="padding:11px 16px;text-align:right;font:500 12.5px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums">{{ r.gross }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1440&quot;,&quot;height&quot;:&quot;960&quot;},&quot;startTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo setup&quot;},&quot;pollSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:1,&quot;max&quot;:15,&quot;step&quot;:1,&quot;default&quot;:4,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo setup&quot;},&quot;startPage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;portfolio&quot;,&quot;distress&quot;,&quot;sources&quot;,&quot;fraud&quot;,&quot;exposure&quot;,&quot;activity&quot;,&quot;worker&quot;],&quot;default&quot;:&quot;portfolio&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo setup&quot;}}">
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const BANDC = { critical:'var(--neg)', fragile:'var(--warn)', building:'var(--info)', resilient:'var(--pos)' };
+
+const PORTFOLIO = {
+  bands: [
+    { key:'critical', label:'Critical', count:214 },
+    { key:'fragile', label:'Fragile', count:486 },
+    { key:'building', label:'Building', count:731 },
+    { key:'resilient', label:'Resilient', count:392 },
+  ],
+  distressCases: 173, outstanding: 18462000, refusals: 268, fraudRings: 4,
+  refusalWeekly: [21, 28, 24, 33, 39, 31, 44, 48],
+  refusalReasons: [
+    { label:'Debt service already above 35% of income', n:112 },
+    { label:'Invoice possibly financed elsewhere', n:74 },
+    { label:'Runway too short to absorb repayment', n:58 },
+    { label:'Verification tier C only — no counterparty', n:24 },
+  ],
+};
+
+const CASES = [
+  { id:'w1', name:'Murugan S.', occ:'Delivery rider', city:'Chennai', score:34, band:'critical', code:'debt_spiral', sev:'critical', runway:6, out:11800,
+    ladder:['Refinance moneylender at 24% APR','Pause savings sweep 2 weeks','Block new advances until DSR < 25%'] },
+  { id:'c2', name:'Ravi Chandran', occ:'Auto driver', city:'Chennai', score:29, band:'critical', code:'runway_critical', sev:'critical', runway:3, out:7400,
+    ladder:['Release ₹2,000 fuel subsidy claim','Advance against verified Uber payout','Landlord extension template'] },
+  { id:'c3', name:'Fathima B.', occ:'Domestic worker', city:'Trichy', score:31, band:'critical', code:'income_drop', sev:'critical', runway:8, out:4200,
+    ladder:['Two households ended — rematch via partner agency','Claim TN welfare board maternity benefit'] },
+  { id:'c4', name:'Selvam K.', occ:'Construction helper', city:'Salem', score:37, band:'critical', code:'debt_spiral', sev:'critical', runway:9, out:16400,
+    ladder:['Consolidate three hand loans','Enrol in e-Shram accident cover'] },
+  { id:'w2', name:'Lakshmi R.', occ:'Tailor', city:'Coimbatore', score:58, band:'fragile', code:'payout_overdue', sev:'warning', runway:19, out:6000,
+    ladder:['Send MSMED s.16 reminder to Anandi Boutique','Flag buyer for shared reputation'] },
+  { id:'c6', name:'Josephine M.', occ:'Beautician', city:'Madurai', score:52, band:'fragile', code:'income_drop', sev:'warning', runway:14, out:3800,
+    ladder:['Festival season upsell playbook','Reduce sweep rate to 5%'] },
+  { id:'c7', name:'Anbu Selvan', occ:'Cab driver', city:'Chennai', score:61, band:'fragile', code:'payout_overdue', sev:'warning', runway:21, out:9200,
+    ladder:['Platform settlement delayed 6 days — escalate','Advance against verified trip log'] },
+  { id:'w3', name:'Arun Kumar', occ:'Freelance designer', city:'Madurai', score:76, band:'resilient', code:'payout_overdue', sev:'warning', runway:47, out:20000,
+    ladder:['Statutory exposure note to Kovai Textiles','Advance at 1.2% for 30 days'] },
+];
+
+const SOURCES = [
+  { id:'s1', name:'Swiggy', type:'Gig platform', workers:412, grade:'A', late:0.4, flags:0, note:'Settles T+1, no disputes in 90 days' },
+  { id:'s2', name:'Zomato', type:'Gig platform', workers:388, grade:'A', late:0.9, flags:0, note:'Settles T+2' },
+  { id:'s3', name:'Uber', type:'Gig platform', workers:216, grade:'B', late:3.1, flags:1, note:'Weekly settlement slipped twice in Aug' },
+  { id:'s4', name:'Anandi Boutique', type:'Buyer', workers:14, grade:'C', late:18.2, flags:2, note:'Two workers flagged delayed payment' },
+  { id:'s5', name:'Kovai Textiles Pvt Ltd', type:'Buyer', workers:9, grade:'D', late:41.0, flags:3, note:'Statutory interest accruing on 4 invoices' },
+  { id:'s6', name:'Nila Studio', type:'Client', workers:6, grade:'A', late:1.2, flags:0, note:'Pays on receipt' },
+  { id:'s7', name:'Sri Ram Tailors', type:'Buyer', workers:11, grade:'B', late:7.6, flags:1, note:'Slower during festival months' },
+];
+
+const TIERMIX = [
+  { tier:'A', label:'Crypto-verified payout', pct:62, n:4218, color:'var(--pos)' },
+  { tier:'B', label:'Plausible reference match', pct:27, n:1837, color:'var(--info)' },
+  { tier:'C', label:'AI-read from photo', pct:11, n:748, color:'var(--warn)' },
+];
+
+const RINGS = [
+  { id:'r1', label:'Ring A · 3 workers, 2 invoices', method:'Perceptual hash distance 2', amount:37200, buyer:'Anandi Boutique',
+    a:{ id:'i202', who:'Lakshmi R.', ph:'invoice photo · original' }, b:{ id:'i911', who:'Devi P.', ph:'invoice photo · re-shot' },
+    why:['Identical layout, hash distance 2 of 64','Invoice number reused with a changed date','Both submitted within 41 minutes'] },
+  { id:'r2', label:'Ring B · 2 workers, 1 invoice', method:'Exact hash match', amount:12400, buyer:'Sri Ram Tailors',
+    a:{ id:'i204', who:'Lakshmi R.', ph:'invoice photo · original' }, b:{ id:'i877', who:'Kavitha S.', ph:'invoice photo · duplicate' },
+    why:['Byte-identical image submitted twice','Second submission from a different device','Advance on the first was already disbursed'] },
+  { id:'r3', label:'Ring C · 4 workers, 3 invoices', method:'Hash cluster + GSTIN reuse', amount:88600, buyer:'Unregistered buyer',
+    a:{ id:'i745', who:'Selvam K.', ph:'invoice photo' }, b:{ id:'i746', who:'Murugan V.', ph:'invoice photo · edited amount' },
+    why:['Same letterhead across three buyers','GSTIN not resolvable','Amounts edited in a photo editor — EXIF shows re-encode'] },
+];
+
+const EXPOSURE = {
+  invoice:'INV-KT-2026-118', buyer:'Kovai Textiles Pvt Ltd', worker:'Arun Kumar', amount:68000,
+  due:'23 Jul 2026', days:41, rateNote:'RBI bank rate 6.45% × 3 = 19.35% p.a.', interest:3142, disallowance:19040,
+  points:['Payment is 41 days past the 45-day MSMED s.16 ceiling as of the demo date','Interest at three times the RBI bank rate accrues automatically, whether or not the supplier asks','Under s.43B(h) the buyer cannot deduct this expense until it is actually paid, moving ₹19,040 of tax into this assessment year'],
+};
+
+const SEED_EVENTS = [
+  { t:'11:42:08', kind:'refusal', text:'Advance of ₹3,000 refused for Murugan S. — debt service 42% of income' },
+  { t:'11:41:55', kind:'verification', text:'Income i101 verified tier A — Swiggy settlement reference matched' },
+  { t:'11:40:31', kind:'crisis', text:'Crisis override for Ravi Chandran routed to PMSBY — ₹0 borrowed' },
+  { t:'11:38:12', kind:'flag', text:'Kovai Textiles Pvt Ltd flagged by Arun Kumar — 3rd flag, grade D' },
+  { t:'11:36:47', kind:'advance', text:'Advance of ₹20,000 approved for Arun Kumar against INV-KT-2026-118' },
+  { t:'11:35:02', kind:'fraud', text:'Ring A opened — perceptual hash distance 2 between i202 and i911' },
+  { t:'11:33:19', kind:'verification', text:'Income i303 verified tier A — retainer credit matched' },
+  { t:'11:31:40', kind:'advance', text:'Advance of ₹6,000 approved for Lakshmi R. after clarification' },
+];
+
+const NEW_EVENTS = [
+  { kind:'verification', text:'Income i412 verified tier C — OCR confidence 88%, capped weight' },
+  { kind:'refusal', text:'Advance of ₹5,000 refused for Selvam K. — runway too short to absorb repayment' },
+  { kind:'advance', text:'Advance of ₹1,800 approved for Anbu Selvan against verified trip log' },
+  { kind:'flag', text:'Uber flagged by Anbu Selvan — settlement 6 days late' },
+  { kind:'crisis', text:'Crisis override for Fathima B. — ₹4,200 paid directly to Sri Balaji Auto Works' },
+  { kind:'verification', text:'Income i415 verified tier B — GSTIN active, invoice sequence plausible' },
+];
+
+const EVK = {
+  verification:{ color:'var(--pos)', soft:'var(--posSoft)', label:'VERIFY' },
+  advance:{ color:'var(--info)', soft:'var(--infoSoft)', label:'ADVANCE' },
+  refusal:{ color:'var(--warn)', soft:'var(--warnSoft)', label:'REFUSED' },
+  crisis:{ color:'var(--neg)', soft:'var(--negSoft)', label:'CRISIS' },
+  flag:{ color:'var(--warn)', soft:'var(--warnSoft)', label:'FLAG' },
+  fraud:{ color:'var(--neg)', soft:'var(--negSoft)', label:'FRAUD' },
+};
+
+const GRADEC = { A:'var(--pos)', B:'var(--info)', C:'var(--warn)', D:'var(--neg)' };
+
+class Component extends DCLogic {
+  state = { theme:'light', page:'portfolio', workerId:'w1', caseId:'w1', fraudRing:'r1', events:SEED_EVENTS, tick:0 };
+
+  componentDidMount() {
+    const th = this.props.startTheme, pg = this.props.startPage;
+    if (th || pg) this.setState({ theme: th || this.state.theme, page: pg || this.state.page }, () => this.applyTheme());
+    this.applyTheme();
+    // Live-feed simulation; the interval handle is owned by the instance and torn down in componentWillUnmount.
+    this.timer = setInterval(() => {
+      const e = NEW_EVENTS[this.state.tick % NEW_EVENTS.length];
+      const now = new Date();
+      const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+      this.setState(s => ({ tick:s.tick+1, events:[{ ...e, t, fresh:true }, ...s.events].slice(0,40) }));
+    }, (this.props.pollSeconds ?? 4) * 1000);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+  componentDidUpdate() { this.applyTheme(); }
+  applyTheme() {
+    try {
+      if (typeof document !== 'undefined' && document.body) document.body.setAttribute('data-sthir-theme', this.state.theme);
+    } catch (err) { /* theming is non-critical; never crash render over it */ }
+  }
+
+  go = page => this.setState({ page });
+
+  renderVals() {
+    const { theme, page } = this.state;
+    const P = PORTFOLIO;
+    const total = P.bands.reduce((a,b) => a + b.count, 0);
+    const peakBand = Math.max(...P.bands.map(b => b.count));
+    const peakRef = Math.max(...P.refusalWeekly);
+    const pages = {
+      portfolio:{ title:'Portfolio overview', sub:'1,823 gig-worker borrowers · funded book as of 3 Sep 2026' },
+      distress:{ title:'Distress caseload', sub:'Triage queue, highest severity first' },
+      sources:{ title:'Income-source scorecards', sub:'Reliability of the platforms and buyers that pay your borrowers' },
+      fraud:{ title:'Verification & fraud', sub:'Tier mix across recent income and rings caught by perceptual hashing' },
+      exposure:{ title:'Statutory exposure', sub:'MSMED Act s.16 interest and s.43B(h) disallowance on late buyers' },
+      activity:{ title:'Live activity', sub:'Append-only event log · polling every 4s' },
+      worker:{ title:'Worker detail', sub:'Read-only resilience snapshot' },
+    };
+    const p = pages[page] || pages.portfolio;
+
+    const navItems = [
+      { key:'portfolio', label:'Portfolio' },
+      { key:'distress', label:'Distress caseload', count:P.distressCases },
+      { key:'sources', label:'Income sources' },
+      { key:'fraud', label:'Verification & fraud', count:P.fraudRings },
+      { key:'exposure', label:'Statutory exposure' },
+      { key:'activity', label:'Live activity' },
+      { key:'worker', label:'Worker detail' },
+    ];
+
+    return {
+      pageTitle:p.title, pageSub:p.sub,
+      themeLabel: theme === 'light' ? 'Switch to dark' : 'Switch to light',
+      toggleTheme: () => this.setState({ theme: theme === 'light' ? 'dark' : 'light' }),
+      resetDemo: () => this.setState({ page:'portfolio', workerId:null, caseId:null, fraudRing:null }),
+      nav: navItems.map(n => ({
+        label:n.label, count:n.count, hasCount: n.count != null, go: () => this.go(n.key),
+        bg: page === n.key ? 'var(--accentSoft)' : 'transparent',
+        border: page === n.key ? 'var(--line)' : 'transparent',
+        fg: page === n.key ? 'var(--accent)' : 'var(--fg2)',
+      })),
+      isPortfolio: page === 'portfolio',
+      totalWorkers: total.toLocaleString('en-IN'),
+      kpis: [
+        { label:'Critical + fragile', value:(P.bands[0].count + P.bands[1].count).toLocaleString('en-IN'), note:'38% of the book needs watching', color:'var(--neg)' },
+        { label:'Active distress cases', value:String(P.distressCases), note:'Open alerts awaiting a case manager', color:'var(--warn)' },
+        { label:'Advances outstanding', value:fmt(P.outstanding), note:'Across 1,204 live advances', color:'var(--fg)' },
+        { label:'Protective refusals', value:String(P.refusals), note:'Declined to prevent a debt spiral', color:'var(--info)' },
+        { label:'Fraud rings detected', value:String(P.fraudRings), note:'Duplicate or re-photographed invoices', color:'var(--neg)' },
+      ],
+      bands: P.bands.map(b => ({ ...b, color:BANDC[b.key], h: Math.round(b.count/peakBand*100) + '%', pct: Math.round(b.count/total*100) + '%' })),
+      refusalBars: P.refusalWeekly.map((v,i) => ({ h: Math.round(v/peakRef*100) + '%', color: i === P.refusalWeekly.length-1 ? 'var(--info)' : 'var(--infoSoft)' })),
+      refusalReasons: P.refusalReasons,
+
+      isDistress: page === 'distress',
+      cases: CASES.map(c => ({ ...c, outFmt:fmt(c.out), bandColor:BANDC[c.band],
+        sevColor: c.sev === 'critical' ? 'var(--neg)' : 'var(--warn)',
+        sevSoft: c.sev === 'critical' ? 'var(--negSoft)' : 'var(--warnSoft)',
+        sevLabel: c.sev === 'critical' ? 'CRITICAL' : 'WARNING',
+        runwayColor: c.runway <= 7 ? 'var(--neg)' : c.runway <= 21 ? 'var(--warn)' : 'var(--fg)',
+        firstStep: c.ladder[0], stepCount: c.ladder.length + ' steps',
+        selected: c.id === this.state.caseId,
+        rowBg: c.id === this.state.caseId ? 'var(--accentSoft)' : 'transparent',
+        open: () => this.setState({ caseId:c.id, workerId:c.id }) })),
+      selCase: (() => {
+        const c = CASES.find(x => x.id === this.state.caseId) || CASES[0];
+        return { ...c, outFmt:fmt(c.out), steps:c.ladder.map((s,i) => ({ s, n:i+1 })),
+          sevColor: c.sev === 'critical' ? 'var(--neg)' : 'var(--warn)',
+          sevSoft: c.sev === 'critical' ? 'var(--negSoft)' : 'var(--warnSoft)',
+          bandColor: BANDC[c.band] };
+      })(),
+      goExposure: () => this.go('exposure'),
+      goWorker: () => this.go('worker'),
+
+      isSources: page === 'sources',
+      sources: SOURCES.map(s => ({ ...s, gradeColor:GRADEC[s.grade],
+        gradeSoft: s.grade === 'A' ? 'var(--posSoft)' : s.grade === 'B' ? 'var(--infoSoft)' : s.grade === 'C' ? 'var(--warnSoft)' : 'var(--negSoft)',
+        lateFmt: s.late.toFixed(1) + ' d',
+        flagColor: s.flags >= 2 ? 'var(--warn)' : 'var(--fg3)',
+        flagLabel: s.flags === 0 ? '—' : s.flags + (s.flags >= 2 ? ' · amber' : ''),
+        flag: () => this.setState({ flashed:s.id }) })),
+      flashed: this.state.flashed,
+
+      isFraud: page === 'fraud',
+      tierMix: TIERMIX.map(t => ({ ...t, w: t.pct + '%', nFmt: t.n.toLocaleString('en-IN'), pctLabel: t.pct + '%' })),
+      rings: RINGS.map(r => ({ ...r, amountFmt:fmt(r.amount), reasons:r.why.map(w => ({ w })),
+        selected: r.id === this.state.fraudRing,
+        bg: r.id === this.state.fraudRing ? 'var(--accentSoft)' : 'var(--panel)',
+        open: () => this.setState({ fraudRing:r.id }) })),
+      selRing: (() => {
+        const r = RINGS.find(x => x.id === this.state.fraudRing) || RINGS[0];
+        return { ...r, amountFmt:fmt(r.amount), reasons:r.why.map(w => ({ w })) };
+      })(),
+
+      isExposure: page === 'exposure',
+      exp: { ...EXPOSURE, amountFmt:fmt(EXPOSURE.amount), interestFmt:fmt(EXPOSURE.interest),
+        disallowFmt:fmt(EXPOSURE.disallowance), totalFmt:fmt(EXPOSURE.interest + EXPOSURE.disallowance),
+        bullets:EXPOSURE.points.map(p => ({ p })) },
+
+      isActivity: page === 'activity',
+      events: this.state.events.map((e,i) => { const k = EVK[e.kind];
+        return { ...e, color:k.color, soft:k.soft, label:k.label, isNew: i === 0 && !!e.fresh }; }),
+
+      isWorker: page === 'worker',
+      wk: (() => {
+        const c = CASES.find(x => x.id === this.state.workerId) || CASES[0];
+        return { ...c, outFmt:fmt(c.out), bandColor:BANDC[c.band], scorePct: c.score + '%',
+          bandLabel: c.band.charAt(0).toUpperCase() + c.band.slice(1),
+          steps: c.ladder.map((s,i) => ({ s, n:i+1 })) };
+      })(),
+      wkIncome: [
+        { id:'i101', date:'02 Sep', src:'Swiggy payout', tier:'A', gross:fmt(1200), status:'settled' },
+        { id:'i102', date:'01 Sep', src:'Local shop delivery (cash)', tier:'C', gross:fmt(450), status:'settled' },
+        { id:'i103', date:'27 Aug', src:'Zomato payout', tier:'A', gross:fmt(1700), status:'settled' },
+        { id:'i104', date:'19 Aug', src:'Swiggy payout', tier:'A', gross:fmt(1500), status:'settled' },
+      ].map(r => ({ ...r, tierColor: r.tier === 'A' ? 'var(--pos)' : r.tier === 'B' ? 'var(--info)' : 'var(--warn)' })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
