@@ -522,6 +522,53 @@ def crisis_override_sample(worker_id: str, key: str, requested: float | None = N
     return crisis.handle(db, w, path, requested=requested)
 
 
+@app.post("/api/workers/{worker_id}/ready-cash")
+def ready_cash(worker_id: str, requested: float | None = Form(None),
+               db: Session = Depends(get_db)):
+    """Direct cash-in-hand advance (what a bank would consider when NO free
+    government scheme applies). Runs the affordability / predatory-debt / exposure
+    gates and either disburses cash to the worker's own UPI, or returns a clear
+    'not eligible for a direct bank loan' with the reason and a better alternative."""
+    from .services import credit
+    w = db.get(Worker, worker_id)
+    if not w:
+        raise HTTPException(404, "worker not found")
+    snap = resilience.compute(db, w, DEMO_TODAY)
+    elig = credit.assess_ready_cash(db, worker=w, snapshot=snap, requested=requested)
+    result = {"decision": elig["decision"], "assessment": elig,
+              "resilience": snap}
+    if elig["decision"] != "eligible":
+        db.add(Event(type="ready_cash.not_eligible", subject_id=w.id,
+                     payload={"reason": elig.get("reason"),
+                              "alternative": elig.get("alternative")}))
+        db.commit()
+        return result
+    amount, fee, net = elig["cash_amount"], elig["flat_fee"], elig["net_cash"]
+    adv = Advance(worker_id=w.id, advance_amount=amount, face_value=amount,
+                  net_disbursed=net, advance_rate=1.0, flat_fee=fee,
+                  apr_equiv=elig["apr_equiv"], decision="approved",
+                  reasons=elig["reasons"])
+    db.add(adv); db.flush()
+    adv.virtual_account = f"STHIR-CASH-{adv.id[-6:].upper()}"
+    db.add(Allocation(advance_id=adv.id, worker_id=w.id, priority=1,
+                      payee=f"{w.name} — UPI (cash in hand)", category="spendable",
+                      amount=net, status="settled"))
+    db.add(Event(type="ready_cash.disbursed", subject_id=adv.id,
+                 payload={"amount": net, "to_worker": True}))
+    db.commit()
+    handle = (w.phone[-10:] if w.phone else "worker")
+    result["cash"] = {
+        "amount": amount, "flat_fee": fee, "net_cash": net,
+        "apr_equiv": elig["apr_equiv"],
+        "paid_to": f"{w.name} (UPI)", "worker_vpa": f"{handle}@upi",
+        "virtual_account": adv.virtual_account,
+        "utr": "SIMUPI" + adv.id.replace("-", "")[-10:].upper(),
+        "rail": "Sthir → worker UPI (simulated)", "simulated": True,
+        "note": "Cash paid to your own account. Repayment starts from next "
+                "week's verified payout."}
+    return result
+
+
 # ------------------------------------------------------------- events / reset
 
 @app.get("/api/events")
