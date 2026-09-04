@@ -251,6 +251,130 @@ async def submit_income(worker_id: str, file: UploadFile = File(...),
                           precomputed=(extraction, backend))
 
 
+# --- v1.2: read-then-confirm flow (make the AI extraction visible) ----------
+import time as _time  # noqa: E402
+_PREVIEW: dict = {}   # token -> {path, extraction, backend, worker_id, ts}
+
+
+def _purge_previews():
+    now = _time.time()
+    for k in [k for k, v in _PREVIEW.items() if now - v["ts"] > 600]:
+        v = _PREVIEW.pop(k, None)
+        try:
+            if v:
+                Path(v["path"]).unlink(missing_ok=True)
+        except Exception:
+            pass
+
+
+def _find_duplicate(db: Session, ph: str):
+    """Return (matched_event, distance) for a duplicate proof, else (None, None)."""
+    from .services import phash
+    for p in db.execute(select(IncomeEvent).where(
+            IncomeEvent.evidence_phash.isnot(None))).scalars().all():
+        dup, dist = phash.is_duplicate(ph, p.evidence_phash)
+        if dup:
+            return p, dist
+    return None, None
+
+
+@app.post("/api/workers/{worker_id}/extract-preview")
+async def extract_preview(worker_id: str, file: UploadFile = File(...),
+                          db: Session = Depends(get_db)):
+    """Read a photo with the vision model WITHOUT booking income - so the
+    worker can see what was read and confirm the amount."""
+    from .services.extract import extract
+    if not db.get(Worker, worker_id):
+        raise HTTPException(404, "worker not found")
+    _purge_previews()
+    dest = DATA_DIR / "evidence" / f"pv-{uuid.uuid4().hex[:8]}-{file.filename}"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with dest.open("wb") as f:
+        shutil.copyfileobj(file.file, f)
+    try:
+        extraction, backend = extract(str(dest))
+    except Exception:
+        extraction, backend = None, "unreadable"
+    if (extraction is not None and backend in ("gemini", "claude")
+            and not getattr(extraction, "is_income_document", True)):
+        dest.unlink(missing_ok=True)
+        return {"rejected": True, "reason_code": "not_income", "backend": backend,
+                "reason": ("This image does not look like a proof of income. "
+                           "Please upload a valid income document.")}
+    token = uuid.uuid4().hex
+    _PREVIEW[token] = {"path": str(dest), "extraction": extraction,
+                       "backend": backend, "worker_id": worker_id,
+                       "ts": _time.time()}
+    return {
+        "token": token, "backend": backend,
+        "read_amount": getattr(extraction, "total_amount", None) if extraction else None,
+        "source_name": getattr(extraction, "seller_name", None) if extraction else None,
+        "document_type": getattr(extraction, "document_type", None) if extraction else None,
+        "date": getattr(extraction, "invoice_date", None) if extraction else None,
+        "confidence": getattr(extraction, "overall_confidence", None) if extraction else None,
+        "evidence_url": f"/api/preview/{token}/evidence",
+    }
+
+
+@app.get("/api/preview/{token}/evidence")
+def preview_evidence(token: str):
+    v = _PREVIEW.get(token)
+    if not v or not Path(v["path"]).exists():
+        raise HTTPException(404, "preview expired")
+    return FileResponse(v["path"], media_type="image/jpeg")
+
+
+@app.post("/api/workers/{worker_id}/confirm-income")
+async def confirm_income(worker_id: str, token: str = Form(...),
+                         gross: float = Form(...), kind: str = Form("gig_payout"),
+                         reference: str = Form(""),
+                         db: Session = Depends(get_db)):
+    """Book the previewed income at the amount the worker confirmed. Re-uses the
+    extraction from the preview (no second model call) and still enforces the
+    amount cross-check and duplicate guard."""
+    from .services import phash
+    v = _PREVIEW.get(token)
+    if not v or v["worker_id"] != worker_id or not Path(v["path"]).exists():
+        raise HTTPException(400, "preview expired - please upload again")
+    dest = Path(v["path"])
+    extraction, backend = v["extraction"], v["backend"]
+
+    read = getattr(extraction, "total_amount", None) if extraction else None
+    if read is not None and read > 0 and backend in ("gemini", "claude"):
+        rel = abs(gross - read) / max(read, gross)
+        if rel > 0.12 and abs(gross - read) > 50:
+            return {"rejected": True, "reason_code": "amount_mismatch",
+                    "backend": backend, "claimed": gross, "document_amount": read,
+                    "reason": (f"The amount you confirmed (Rs {gross:,.0f}) does "
+                               f"not match the document (Rs {read:,.0f}).")}
+    try:
+        ph = phash.combined(dest)
+    except Exception:
+        ph = None
+    if ph:
+        match, dist = _find_duplicate(db, ph)
+        if match is not None:
+            _PREVIEW.pop(token, None)
+            dest.unlink(missing_ok=True)
+            same = (match.worker_id == worker_id)
+            db.add(Event(type="fraud.duplicate_proof", subject_id=worker_id,
+                         payload={"matched_income": match.id, "distance": dist,
+                                  "same_worker": same}))
+            db.commit()
+            return {"rejected": True, "reason_code": "duplicate_proof",
+                    "backend": backend, "distance": dist, "same_worker": same,
+                    "reason": ("This proof has already been submitted"
+                               + ("" if same else " (by another worker)")
+                               + ". The same payout can't be financed twice.")}
+    _PREVIEW.pop(token, None)
+    e = IncomeEvent(worker_id=worker_id, kind=kind, gross=gross,
+                    reference=reference or f"UP-{uuid.uuid4().hex[:5].upper()}",
+                    expected_date=dt.datetime.combine(DEMO_TODAY, dt.time()),
+                    status="expected", evidence_path=str(dest), evidence_phash=ph)
+    db.add(e); db.flush()
+    return process_income(db, e, as_of=DEMO_TODAY, precomputed=(extraction, backend))
+
+
 @app.get("/api/income/{event_id}/evidence")
 def income_evidence(event_id: str, db: Session = Depends(get_db)):
     e = db.get(IncomeEvent, event_id)

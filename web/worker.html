@@ -265,6 +265,7 @@ const UX = {
     amount:'Amount on document', type:'Type', refOpt:'Reference (optional)', cancel:'Cancel', verifySubmit:'Verify & submit',
     enterAmount:'Enter the amount on the document.', chooseFirst:'Choose a photo or PDF first.', upFail:'Upload failed — is the backend running?',
     verifying:'Verifying your proof…', verifyingSub:'Checking references, amounts and image history',
+    readDoc:'Read this document', readingDoc:'Reading your document…', readingDocSub:'The AI is reading the amount and details from your photo', weRead:'Here is what we read', readAmount:'Amount read', readSource:'Source', readDate:'Date', readType:'Document', confidence:'Confidence', noAmountRead:'We could not read an amount — please type it in.', adjustHint:'Check the amount and correct it if the AI misread. It must match the document.', confirmSubmit:'Confirm & submit', backEdit:'Use a different photo',
     verifiedTier:'Verified · tier', resilienceRefreshed:'Resilience refreshed', before:'before',
     submitAnother:'Submit another', requestAdvance:'Request an advance', noPending:'No pending demo submissions for this worker.',
     askIntro:'Sthir sizes the advance for you — against your verified income, capped so it stays affordable.',
@@ -286,6 +287,7 @@ const UX = {
     amount:'ஆவணத்தில் உள்ள தொகை', type:'வகை', refOpt:'குறிப்பு (விருப்பம்)', cancel:'ரத்து', verifySubmit:'சரிபார்த்து சமர்ப்பி',
     enterAmount:'ஆவணத்தில் உள்ள தொகையை உள்ளிடு.', chooseFirst:'முதலில் புகைப்படம் அல்லது PDF தேர்ந்தெடு.', upFail:'பதிவேற்றம் தோல்வி — பின்தளம் இயங்குகிறதா?',
     verifying:'உங்கள் சான்றைச் சரிபார்க்கிறது…', verifyingSub:'குறிப்புகள், தொகைகள் மற்றும் பட வரலாறு சரிபார்க்கப்படுகிறது',
+    readDoc:'இந்த ஆவணத்தைப் படி', readingDoc:'உங்கள் ஆவணம் படிக்கப்படுகிறது…', readingDocSub:'AI உங்கள் புகைப்படத்திலிருந்து தொகையையும் விவரங்களையும் படிக்கிறது', weRead:'நாங்கள் படித்தது இதோ', readAmount:'படித்த தொகை', readSource:'ஆதாரம்', readDate:'தேதி', readType:'ஆவணம்', confidence:'நம்பகத்தன்மை', noAmountRead:'தொகையைப் படிக்க முடியவில்லை — தயவுசெய்து உள்ளிடவும்.', adjustHint:'தொகையைச் சரிபார்த்து, AI தவறாகப் படித்திருந்தால் திருத்தவும். இது ஆவணத்துடன் பொருந்த வேண்டும்.', confirmSubmit:'உறுதிப்படுத்தி சமர்ப்பி', backEdit:'வேறு புகைப்படம் பயன்படுத்து',
     verifiedTier:'சரிபார்க்கப்பட்டது · அடுக்கு', resilienceRefreshed:'நிலைத்தன்மை புதுப்பிக்கப்பட்டது', before:'முன்பு',
     submitAnother:'மற்றொன்று சமர்ப்பி', requestAdvance:'முன்பணம் கேட்க', noPending:'இந்தத் தொழிலாளருக்கு நிலுவை சமர்ப்பிப்புகள் இல்லை.',
     askIntro:'ஸ்திர் உங்களுக்கு முன்பணத்தை அளவிடுகிறது — உங்கள் சரிபார்க்கப்பட்ட வருமானத்திற்கு எதிராக, தாங்கக்கூடியதாக இருக்க வரம்பிடப்பட்டு.',
@@ -307,6 +309,7 @@ const UX = {
     amount:'दस्तावेज़ पर राशि', type:'प्रकार', refOpt:'संदर्भ (वैकल्पिक)', cancel:'रद्द', verifySubmit:'सत्यापित कर जमा करें',
     enterAmount:'दस्तावेज़ पर लिखी राशि दर्ज करें.', chooseFirst:'पहले फ़ोटो या PDF चुनें.', upFail:'अपलोड विफल — क्या बैकएंड चल रहा है?',
     verifying:'आपका प्रमाण सत्यापित हो रहा है…', verifyingSub:'संदर्भ, राशि और छवि इतिहास की जाँच',
+    readDoc:'यह दस्तावेज़ पढ़ें', readingDoc:'आपका दस्तावेज़ पढ़ा जा रहा है…', readingDocSub:'AI आपकी फ़ोटो से राशि और विवरण पढ़ रहा है', weRead:'हमने यह पढ़ा', readAmount:'पढ़ी गई राशि', readSource:'स्रोत', readDate:'तारीख', readType:'दस्तावेज़', confidence:'विश्वास', noAmountRead:'हम राशि नहीं पढ़ सके — कृपया इसे टाइप करें.', adjustHint:'नीचे दी गई राशि जाँचें और यदि AI ने गलत पढ़ा हो तो सुधारें. यह दस्तावेज़ से मेल खानी चाहिए.', confirmSubmit:'पुष्टि कर जमा करें', backEdit:'दूसरी फ़ोटो चुनें',
     verifiedTier:'सत्यापित · टियर', resilienceRefreshed:'मज़बूती अपडेट हुई', before:'पहले',
     submitAnother:'एक और जमा करें', requestAdvance:'एडवांस माँगें', noPending:'इस कामगार के लिए कोई लंबित सबमिशन नहीं.',
     askIntro:'स्थिर आपके लिए एडवांस का आकार तय करता है — आपकी सत्यापित आय के विरुद्ध, वहन योग्य रहने हेतु सीमित.',
@@ -602,7 +605,7 @@ function Income({ income, lang='en' }) {
 
 function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
   const U = ux(lang);
-  const [phase, setPhase] = useState('pick'); // pick | verifying | result
+  const [phase, setPhase] = useState('pick'); // pick | reading | preview | verifying | result
   const [result, setResult] = useState(null);
   const [before, setBefore] = useState(null);
   const fileRef = useRef(null);
@@ -611,6 +614,7 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
   const [gross, setGross] = useState('');
   const [ref, setRef] = useState('');
   const [upErr, setUpErr] = useState('');
+  const [preview, setPreview] = useState(null); // {token, read_amount, source_name, document_type, date, confidence, backend, evidence_url}
   const pick = async (s) => {
     setBefore(detail ? detail.resilience.resilience_score : null);
     setPhase('verifying');
@@ -618,25 +622,85 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
     catch(e){ setPhase('pick'); }
   };
   const onFile = (e) => { const f = e.target.files && e.target.files[0]; if(f){ setFile(f); setUpErr(''); } };
-  const upload = async () => {
-    const amt = parseFloat(gross);
+  // Step 1 — let the AI read the document, without booking anything yet.
+  const runPreview = async () => {
     if(!file){ setUpErr(U.chooseFirst); return; }
-    if(!Number.isFinite(amt) || amt<=0){ setUpErr(U.enterAmount); return; }
-    setBefore(detail ? detail.resilience.resilience_score : null);
-    setPhase('verifying');
+    setUpErr(''); setPhase('reading');
     try {
-      const fd = new FormData();
-      fd.append('file', file); fd.append('kind', kind); fd.append('gross', String(amt)); fd.append('reference', ref);
-      const r = await fetch(API + `/workers/${workerId}/submit-income`, { method:'POST', body:fd });
-      if(!r.ok) throw new Error('upload ' + r.status);
+      const fd = new FormData(); fd.append('file', file);
+      const r = await fetch(API + `/workers/${workerId}/extract-preview`, { method:'POST', body:fd });
+      if(!r.ok) throw new Error('preview ' + r.status);
       const data = await r.json();
-      if(data.rejected){ setUpErr(data.reason_code==='amount_mismatch' ? U.mismatch(data.claimed, data.document_amount) : (data.reason_code==='duplicate_proof' ? U.duplicate : (data.reason_code==='not_income' ? U.notIncome : (data.reason||U.upFail)))); setPhase('pick'); return; }
-      setResult({ ...data, sample:{ reference: data.reference || ref || file.name, gross: amt, kind, source_name: ref || file.name } });
-      setFile(null); setGross(''); setRef('');
-      setPhase('result');
+      if(data.rejected){ setUpErr(data.reason_code==='not_income' ? U.notIncome : (data.reason||U.upFail)); setPhase('pick'); return; }
+      setPreview(data);
+      if(data.read_amount!=null && data.read_amount>0) setGross(String(Math.round(data.read_amount)));
+      setPhase('preview');
     } catch(e){ setUpErr(U.upFail); setPhase('pick'); }
   };
+  // Step 2 — book at the amount the worker confirmed (re-uses the read; no 2nd AI call).
+  const confirmSubmit = async () => {
+    const amt = parseFloat(gross);
+    if(!Number.isFinite(amt) || amt<=0){ setUpErr(U.enterAmount); return; }
+    if(!preview){ setUpErr(U.upFail); return; }
+    setBefore(detail ? detail.resilience.resilience_score : null);
+    setUpErr(''); setPhase('verifying');
+    try {
+      const fd = new FormData();
+      fd.append('token', preview.token); fd.append('gross', String(amt)); fd.append('kind', kind); fd.append('reference', ref);
+      const r = await fetch(API + `/workers/${workerId}/confirm-income`, { method:'POST', body:fd });
+      if(!r.ok) throw new Error('confirm ' + r.status);
+      const data = await r.json();
+      if(data.rejected){ setUpErr(data.reason_code==='amount_mismatch' ? U.mismatch(data.claimed, data.document_amount) : (data.reason_code==='duplicate_proof' ? U.duplicate : (data.reason||U.upFail))); setPhase('preview'); return; }
+      setResult({ ...data, sample:{ reference: data.reference || ref || file.name, gross: amt, kind, source_name: ref || preview.source_name || file.name } });
+      setFile(null); setGross(''); setRef(''); setPreview(null);
+      setPhase('result');
+    } catch(e){ setUpErr(U.upFail); setPhase('preview'); }
+  };
+  if (phase==='reading') return html`<div style=${{maxWidth:680}}><${Spinner} color="#2E5A87" title=${U.readingDoc} sub=${U.readingDocSub}/></div>`;
   if (phase==='verifying') return html`<div style=${{maxWidth:680}}><${Spinner} color="#2E5A87" title=${U.verifying} sub=${U.verifyingSub}/></div>`;
+  if (phase==='preview' && preview) {
+    const conf = preview.confidence!=null ? Math.round(preview.confidence*100) : null;
+    const row = (label, val) => html`<div style=${{display:'flex',justifyContent:'space-between',gap:12,padding:'7px 0',borderBottom:'1px solid #EFE7D8',fontSize:12.5}}><span style=${{color:'#8B7E6E'}}>${label}</span><span style=${{fontWeight:700,color:'#4A4034',textAlign:'right'}}>${val}</span></div>`;
+    return html`
+    <div style=${{maxWidth:680,display:'flex',flexDirection:'column',gap:16,animation:'sthirRise .3s ease both'}}>
+      <${Card}>
+        <${Eyebrow} color="#6A5D4E">${U.weRead} · ${preview.backend}<//>
+        <div style=${{marginTop:12,display:'flex',gap:16,alignItems:'flex-start'}}>
+          <img src=${(window.STHIR_API||'') + preview.evidence_url} alt="proof" style=${{flex:'none',width:96,height:96,objectFit:'cover',borderRadius:10,border:'1px solid #E5DAC7'}}/>
+          <div style=${{flex:1,minWidth:0}}>
+            <div style=${{fontSize:11,letterSpacing:'.08em',textTransform:'uppercase',color:'#8B7E6E'}}>${U.readAmount}</div>
+            <div style=${{marginTop:2,fontSize:30,fontWeight:800,color:'#233150',fontVariantNumeric:'tabular-nums'}}>${preview.read_amount!=null&&preview.read_amount>0?fmt(preview.read_amount):'—'}</div>
+            <div style=${{marginTop:8}}>
+              ${preview.source_name?row(U.readSource, preview.source_name):null}
+              ${preview.date?row(U.readDate, preview.date):null}
+              ${preview.document_type?row(U.readType, String(preview.document_type).replace(/_/g,' ')):null}
+              ${conf!=null?row(U.confidence, conf+'%'):null}
+            </div>
+          </div>
+        </div>
+      <//>
+      <${Card}>
+        <div style=${{fontSize:12,color:'#8B7E6E',lineHeight:1.5,marginBottom:12}}>${preview.read_amount!=null&&preview.read_amount>0?U.adjustHint:U.noAmountRead}</div>
+        <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.amount}</span>
+            <input value=${gross} onInput=${e=>setGross(e.target.value)} type="number" inputMode="decimal" placeholder="e.g. 1800"
+              style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'600 15px inherit',outline:'none'}}/></label>
+          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.type}</span>
+            <select value=${kind} onChange=${e=>setKind(e.target.value)} style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}>
+              <option value="gig_payout">${U.kinds.gig_payout}</option><option value="invoice">${U.kinds.invoice}</option><option value="cash_gig">${U.kinds.cash_gig}</option><option value="salary">${U.kinds.salary}</option>
+            </select></label>
+        </div>
+        <label style=${{display:'block',marginTop:10}}><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.refOpt}</span>
+          <input value=${ref} onInput=${e=>setRef(e.target.value)} type="text" placeholder="Invoice no. / payout ref"
+            style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}/></label>
+        ${upErr?html`<div style=${{marginTop:10,fontSize:12.5,color:'#B23A2C',fontWeight:600}}>${upErr}</div>`:null}
+        <div style=${{marginTop:14,display:'grid',gridTemplateColumns:'1fr 2fr',gap:10}}>
+          <button onClick=${()=>{setPhase('pick');setPreview(null);setGross('');setUpErr('');}} style=${{cursor:'pointer',padding:12,borderRadius:10,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.backEdit}</button>
+          <button onClick=${confirmSubmit} style=${{cursor:'pointer',padding:12,borderRadius:10,border:0,background:'#233150',color:'#FFFDF8',font:'800 13px inherit'}}>${U.confirmSubmit}</button>
+        </div>
+      <//>
+    </div>`;
+  }
   if (phase==='result' && result && result.verification) {
     const v = result.verification, tr = tierOf(v.tier);
     const after = result.resilience.resilience_score;
@@ -693,22 +757,11 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
       </div>
       ${file?html`
       <div style=${{padding:18,borderRadius:12,border:'1px solid #EBE3D3',background:'#FFFDF8',boxShadow:'0 1px 2px rgba(90,60,30,.04)',display:'flex',flexDirection:'column',gap:12}}>
-        <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.amount}</span>
-            <input value=${gross} onInput=${e=>setGross(e.target.value)} type="number" inputMode="decimal" placeholder="e.g. 1800"
-              style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}/></label>
-          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.type}</span>
-            <select value=${kind} onChange=${e=>setKind(e.target.value)} style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}>
-              <option value="gig_payout">${U.kinds.gig_payout}</option><option value="invoice">${U.kinds.invoice}</option><option value="cash_gig">${U.kinds.cash_gig}</option><option value="salary">${U.kinds.salary}</option>
-            </select></label>
-        </div>
-        <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.refOpt}</span>
-          <input value=${ref} onInput=${e=>setRef(e.target.value)} type="text" placeholder="Invoice no. / payout ref"
-            style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}/></label>
+        <div style=${{fontSize:12,color:'#6A5D4E',lineHeight:1.5}}>${U.readingDocSub}</div>
         ${upErr?html`<div style=${{fontSize:12.5,color:'#B23A2C',fontWeight:600}}>${upErr}</div>`:null}
         <div style=${{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10}}>
           <button onClick=${()=>{setFile(null);setUpErr('');}} style=${{cursor:'pointer',padding:12,borderRadius:10,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.cancel}</button>
-          <button onClick=${upload} style=${{cursor:'pointer',padding:12,borderRadius:10,border:0,background:'#233150',color:'#FFFDF8',font:'800 13px inherit'}}>${U.verifySubmit}</button>
+          <button onClick=${runPreview} style=${{cursor:'pointer',padding:12,borderRadius:10,border:0,background:'#233150',color:'#FFFDF8',font:'800 13px inherit'}}>${U.readDoc}</button>
         </div>
       </div>`:null}
     </div>
