@@ -199,16 +199,26 @@ function Fraud({ tierMix, rings }) {
       <div style=${{marginTop:16,display:'flex',height:14,borderRadius:4,overflow:'hidden',border:'1px solid var(--line2)'}}>
         ${(tierMix||[]).map((t,i)=>html`<div key=${i} style=${{width:(total?t.n/total*100:0)+'%',background:t.color}}></div>`)}
       </div>
-      <div style=${{marginTop:14,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
-        ${(tierMix||[]).map((t,i)=>html`<div key=${i} style=${{padding:12,borderRadius:8,background:'var(--panel2)',border:'1px solid var(--line2)'}}>
-          <div style=${{display:'flex',alignItems:'center',gap:8}}>
-            <span style=${{width:9,height:9,borderRadius:2,background:t.color}}></span>
-            <span style=${{font:"600 12px 'IBM Plex Mono',monospace",color:t.color}}>Tier ${t.tier}</span>
-            <span style=${{marginLeft:'auto',font:"600 13px 'IBM Plex Mono',monospace",fontVariantNumeric:'tabular-nums'}}>${total?Math.round(t.n/total*100):0}%</span>
-          </div>
-          <div style=${{marginTop:7,fontSize:12,color:'var(--fg2)'}}>${t.label}</div>
-          <div style=${{marginTop:3,font:"400 11px 'IBM Plex Mono',monospace",color:'var(--fg3)'}}>${t.n} events</div>
-        </div>`)}
+      <div style=${{marginTop:18,display:'flex',alignItems:'center',gap:24,flexWrap:'wrap'}}>
+        ${(()=>{ const R=52,C=2*Math.PI*R; let off=0;
+          const segs=(tierMix||[]).map((t,i)=>{ const frac=total?t.n/total:0; const el=html`<circle key=${i} cx="70" cy="70" r=${R} fill="none" stroke=${t.color} stroke-width="16" stroke-dasharray=${(frac*C).toFixed(2)+' '+C.toFixed(2)} stroke-dashoffset=${(-off*C).toFixed(2)} transform="rotate(-90 70 70)"/>`; off+=frac; return el; });
+          return html`<svg width="140" height="140" viewBox="0 0 140 140" style=${{flex:'none'}}>
+            <circle cx="70" cy="70" r="52" fill="none" stroke="var(--line2)" stroke-width="16"/>
+            ${segs}
+            <text x="70" y="66" text-anchor="middle" style=${{font:"700 22px 'IBM Plex Mono',monospace",fill:'var(--fg)'}}>${total}</text>
+            <text x="70" y="84" text-anchor="middle" style=${{font:"400 8.5px 'IBM Plex Mono',monospace",fill:'var(--fg3)',letterSpacing:'.14em'}}>EVENTS</text>
+          </svg>`; })()}
+        <div style=${{flex:1,minWidth:260,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12}}>
+          ${(tierMix||[]).map((t,i)=>html`<div key=${i} style=${{padding:12,borderRadius:8,background:'var(--panel2)',border:'1px solid var(--line2)'}}>
+            <div style=${{display:'flex',alignItems:'center',gap:8}}>
+              <span style=${{width:9,height:9,borderRadius:2,background:t.color}}></span>
+              <span style=${{font:"600 12px 'IBM Plex Mono',monospace",color:t.color}}>Tier ${t.tier}</span>
+              <span style=${{marginLeft:'auto',font:"600 13px 'IBM Plex Mono',monospace",fontVariantNumeric:'tabular-nums'}}>${total?Math.round(t.n/total*100):0}%</span>
+            </div>
+            <div style=${{marginTop:7,fontSize:12,color:'var(--fg2)'}}>${t.label}</div>
+            <div style=${{marginTop:3,font:"400 11px 'IBM Plex Mono',monospace",color:'var(--fg3)'}}>${t.n} events</div>
+          </div>`)}
+        </div>
       </div>
     <//>
     <${Panel}>
@@ -381,6 +391,7 @@ function LenderLogin({ onLogin, theme, setTheme }) {
       <a href="/" style=${{fontSize:15,fontWeight:700,letterSpacing:'-.01em',color:'var(--fg)',textDecoration:'none'}}>Sthir</a>
       <span style=${{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',color:'var(--fg3)'}}>Lender console</span>
       <span style=${{flex:1}}></span>
+      <a href="/" style=${{display:'inline-flex',alignItems:'center',gap:6,marginRight:10,textDecoration:'none',fontSize:12,fontWeight:600,color:'var(--fg2)',padding:'7px 11px',borderRadius:8,border:'1px solid var(--line)',background:'var(--panel)'}}><span style=${{fontSize:14,lineHeight:1}}>‹</span>Choose portal</a>
       <button onClick=${()=>setTheme(theme==='light'?'dark':'light')} style=${{cursor:'pointer',padding:'7px 11px',borderRadius:8,border:'1px solid var(--line)',background:'var(--panel)',color:'var(--fg2)',font:'500 12px inherit'}}>${theme==='light'?'◑ Dark':'◐ Light'}</button>
     </header>
     <div style=${{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'32px 24px',animation:'sthirIn .25s ease both'}}>

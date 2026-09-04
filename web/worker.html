@@ -121,6 +121,7 @@ const I18N = {
     greet:{m:'Good Morning',a:'Good Afternoon',e:'Good Evening'},
     heroSub:'You have {n} {a} to review today', alertOne:'alert', alertMany:'alerts', heroBtn:'Review alerts',
     calendar:'Calendar', reminders:'Reminders', bills:'bills', apr:'APR', mo:'/mo', monthEst:'monthly estimate',
+    choosePortal:'Choose portal', legBill:'Bill due', legHigh:'High-interest', legToday:'Today', nothingDue:'Nothing due this day.', tapDay:'Tap a day to see what’s due.',
     weekdays:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     cat:{rent:'Rent',emi:'Loan / EMI',utility:'Utility',input:'Supplies',family:'Family support'},
@@ -130,6 +131,7 @@ const I18N = {
     greet:{m:'காலை வணக்கம்',a:'மதிய வணக்கம்',e:'மாலை வணக்கம்'},
     heroSub:'இன்று பார்க்க வேண்டிய {n} {a}', alertOne:'எச்சரிக்கை', alertMany:'எச்சரிக்கைகள்', heroBtn:'எச்சரிக்கைகளைப் பார்',
     calendar:'நாட்காட்டி', reminders:'நினைவூட்டல்கள்', bills:'பில்கள்', apr:'வட்டி', mo:'/மாதம்', monthEst:'மாதாந்திர மதிப்பீடு',
+    choosePortal:'போர்ட்டல் தேர்வு', legBill:'பில் நிலுவை', legHigh:'அதிக வட்டி', legToday:'இன்று', nothingDue:'இந்த நாளில் நிலுவை இல்லை.', tapDay:'என்ன நிலுவை என்று பார்க்க ஒரு நாளைத் தொடு.',
     weekdays:['திங்','செவ்','புத','வியா','வெள்','சனி','ஞாயி'],
     months:['ஜன','பிப்','மார்','ஏப்','மே','ஜூன்','ஜூலை','ஆக','செப்','அக்','நவ','டிச'],
     cat:{rent:'வாடகை',emi:'கடன் / EMI',utility:'பயன்பாடு',input:'பொருட்கள்',family:'குடும்ப ஆதரவு'},
@@ -141,6 +143,7 @@ const I18N = {
     greet:{m:'सुप्रभात',a:'नमस्कार',e:'शुभ संध्या'},
     heroSub:'आज समीक्षा के लिए {n} {a}', alertOne:'चेतावनी', alertMany:'चेतावनियाँ', heroBtn:'चेतावनियाँ देखें',
     calendar:'कैलेंडर', reminders:'रिमाइंडर', bills:'बिल', apr:'ब्याज', mo:'/माह', monthEst:'मासिक अनुमान',
+    choosePortal:'पोर्टल चुनें', legBill:'बिल देय', legHigh:'ऊँचा ब्याज', legToday:'आज', nothingDue:'इस दिन कुछ देय नहीं.', tapDay:'देखने के लिए किसी दिन पर टैप करें.',
     weekdays:['सोम','मंगल','बुध','गुरु','शुक्र','शनि','रवि'],
     months:['जन','फ़र','मार्च','अप्रैल','मई','जून','जुल','अग','सित','अक्टू','नव','दिस'],
     cat:{rent:'किराया',emi:'ऋण / EMI',utility:'उपयोगिता',input:'सामग्री',family:'परिवार सहायता'},
@@ -260,7 +263,7 @@ function TX(text, lang) {
 const UX = {
   en: {
     kinds:{gig_payout:'gig payout',invoice:'invoice',cash_gig:'cash gig',salary:'salary'},
-    tierA:'crypto-verified payout', tierB:'plausible reference match', tierC:'AI-read from photo', overdue:'overdue',
+    weeklyIncome:'Verified income by week', tierA:'crypto-verified payout', tierB:'plausible reference match', tierC:'AI-read from photo', overdue:'overdue',
     upTitle:'Upload a new photo', upSel:'Photo selected', upHint:'Camera or gallery · JPG, PNG, PDF',
     amount:'Amount on document', type:'Type', refOpt:'Reference (optional)', cancel:'Cancel', verifySubmit:'Verify & submit',
     enterAmount:'Enter the amount on the document.', chooseFirst:'Choose a photo or PDF first.', upFail:'Upload failed — is the backend running?',
@@ -273,7 +276,7 @@ const UX = {
     needProof:'Submit an income proof first — advances are taken only against verified income.',
     approved:'Approved', aprEquiv:'APR equiv', splitNote:'Split into buckets before it reaches you, so rent and essentials are already handled. Net disbursed', allocation:'Allocation', vpa:'Virtual UPI account', askAgain:'Ask again',
     heldBack:'Held back to protect you', deepen:'Another advance now would deepen the hole, not fill it.', betterOption:'Better option, ready now', startRefi:'Start the refinance', back:'Back', oneQ:'One question first', needsClarify:'Needs clarification.',
-    savBalance:'Savings balance', ledgerLabel:'Sweeps and drawdowns', noSweeps:'No sweeps yet. Savings build automatically from each verified payout.', cushionA:'of a', cushionB:'cushion · auto-save',
+    savGrowth:'Savings growth', savBalance:'Savings balance', ledgerLabel:'Sweeps and drawdowns', noSweeps:'No sweeps yet. Savings build automatically from each verified payout.', cushionA:'of a', cushionB:'cushion · auto-save',
     welfareApplied:'Welfare offset applied', coveredFree:'covered free', loan:'loan', maxCover:'Max cover', noScheme:'No matching scheme for this case.', free:'Free', sev:{critical:'Critical',warning:'Warning'}, notIncome:"This image doesn't look like a proof of income (invoice, payout screenshot, receipt or payslip). Please upload a valid income document.", mismatch:(c,d)=>`The amount you entered (${fmt(c)}) doesn't match the document (${fmt(d)}). Enter the amount shown on the proof.`, duplicate:'This proof has already been submitted. The same payout cannot be financed twice.', notCrisisTitle:'Not an emergency bill', notCrisisMsg:"This image doesn't look like a bill, hospital estimate or damage photo. Please upload the actual emergency document.", crisisChoose:'Choose a bill / photo first.', crisisFail:'Upload failed — is the backend running?',
     takePhoto:'Take a photo now', billHint:'Bill, hospital estimate, or damage', orDemo:'Or run a demo case', reading:'Reading your document…', readingSub:'Then checking every scheme you qualify for',
     assessment:'Assessment', goodNews:'Good news', coveredMsgA:'This is fully covered for free by', coveredMsgB:'. No loan needed.', youBorrow:'You borrow', claimSteps:'See the claim steps',
@@ -282,7 +285,7 @@ const UX = {
   },
   ta: {
     kinds:{gig_payout:'கிக் பணம்',invoice:'இன்வாய்ஸ்',cash_gig:'ரொக்க வேலை',salary:'சம்பளம்'},
-    tierA:'சான்றளிக்கப்பட்ட வரவு', tierB:'நம்பத்தகுந்த குறிப்பு பொருத்தம்', tierC:'படத்திலிருந்து AI படித்தது', overdue:'தாமதம்',
+    weeklyIncome:'வாராந்திர சரிபார்க்கப்பட்ட வருமானம்', tierA:'சான்றளிக்கப்பட்ட வரவு', tierB:'நம்பத்தகுந்த குறிப்பு பொருத்தம்', tierC:'படத்திலிருந்து AI படித்தது', overdue:'தாமதம்',
     upTitle:'புதிய புகைப்படம் பதிவேற்று', upSel:'புகைப்படம் தேர்ந்தெடுக்கப்பட்டது', upHint:'கேமரா அல்லது கேலரி · JPG, PNG, PDF',
     amount:'ஆவணத்தில் உள்ள தொகை', type:'வகை', refOpt:'குறிப்பு (விருப்பம்)', cancel:'ரத்து', verifySubmit:'சரிபார்த்து சமர்ப்பி',
     enterAmount:'ஆவணத்தில் உள்ள தொகையை உள்ளிடு.', chooseFirst:'முதலில் புகைப்படம் அல்லது PDF தேர்ந்தெடு.', upFail:'பதிவேற்றம் தோல்வி — பின்தளம் இயங்குகிறதா?',
@@ -295,7 +298,7 @@ const UX = {
     needProof:'முதலில் வருமானச் சான்று சமர்ப்பி — முன்பணம் சரிபார்க்கப்பட்ட வருமானத்திற்கு எதிராக மட்டுமே.',
     approved:'அங்கீகரிக்கப்பட்டது', aprEquiv:'வட்டி சமம்', splitNote:'உங்களை அடைவதற்கு முன் பிரிக்கப்படுகிறது, வாடகையும் அத்தியாவசியமும் ஏற்கனவே கவனிக்கப்படுகின்றன. வழங்கப்பட்டது', allocation:'ஒதுக்கீடு', vpa:'மெய்நிகர் UPI கணக்கு', askAgain:'மீண்டும் கேள்',
     heldBack:'உங்களைப் பாதுகாக்க தடுக்கப்பட்டது', deepen:'இப்போது மற்றொரு முன்பணம் பள்ளத்தை நிரப்பாது, ஆழமாக்கும்.', betterOption:'சிறந்த வழி, இப்போது தயார்', startRefi:'மறுநிதியளிப்பைத் தொடங்கு', back:'பின்', oneQ:'முதலில் ஒரு கேள்வி', needsClarify:'தெளிவுபடுத்த வேண்டும்.',
-    savBalance:'சேமிப்பு இருப்பு', ledgerLabel:'சேமிப்பு மற்றும் எடுப்பு', noSweeps:'இன்னும் சேமிப்பு இல்லை. ஒவ்வொரு சரிபார்க்கப்பட்ட வரவிலிருந்தும் சேமிப்பு தானாக உருவாகும்.', cushionA:'இதன்', cushionB:'பாதுகாப்பு · தானியங்கு சேமிப்பு',
+    savGrowth:'சேமிப்பு வளர்ச்சி', savBalance:'சேமிப்பு இருப்பு', ledgerLabel:'சேமிப்பு மற்றும் எடுப்பு', noSweeps:'இன்னும் சேமிப்பு இல்லை. ஒவ்வொரு சரிபார்க்கப்பட்ட வரவிலிருந்தும் சேமிப்பு தானாக உருவாகும்.', cushionA:'இதன்', cushionB:'பாதுகாப்பு · தானியங்கு சேமிப்பு',
     welfareApplied:'நல ஈடு பயன்படுத்தப்பட்டது', coveredFree:'இலவசமாக ஈடு', loan:'கடன்', maxCover:'அதிகபட்ச காப்பீடு', noScheme:'இந்நிலைக்கு பொருந்தும் திட்டம் இல்லை.', free:'இலவசம்', sev:{critical:'மிக அவசரம்',warning:'எச்சரிக்கை'}, notIncome:'இந்தப் படம் வருமானச் சான்று போல் இல்லை (இன்வாய்ஸ், பணம் ஸ்கிரீன்ஷாட், ரசீது அல்லது சம்பளச் சீட்டு). சரியான வருமான ஆவணத்தைப் பதிவேற்றவும்.', mismatch:(c,d)=>`நீங்கள் உள்ளிட்ட தொகை (${fmt(c)}) ஆவணத்தில் உள்ள தொகையுடன் (${fmt(d)}) பொருந்தவில்லை. சான்றில் காட்டப்பட்ட தொகையை உள்ளிடவும்.`, duplicate:'இந்தச் சான்று ஏற்கனவே சமர்ப்பிக்கப்பட்டது. ஒரே பணத்தை இருமுறை நிதியளிக்க முடியாது.', notCrisisTitle:'அவசர பில் அல்ல', notCrisisMsg:'இந்தப் படம் பில், மருத்துவமனை மதிப்பீடு அல்லது சேதப் படம் போல் இல்லை. உண்மையான அவசர ஆவணத்தைப் பதிவேற்றவும்.', crisisChoose:'முதலில் ஒரு பில்/படம் தேர்ந்தெடு.', crisisFail:'பதிவேற்றம் தோல்வி — பின்தளம் இயங்குகிறதா?',
     takePhoto:'இப்போது புகைப்படம் எடு', billHint:'பில், மருத்துவமனை மதிப்பீடு, அல்லது சேதம்', orDemo:'அல்லது ஒரு டெமோ வழக்கை இயக்கு', reading:'உங்கள் ஆவணத்தைப் படிக்கிறது…', readingSub:'பின் நீங்கள் தகுதியுள்ள ஒவ்வொரு திட்டத்தையும் சரிபார்க்கிறது',
     assessment:'மதிப்பீடு', goodNews:'நற்செய்தி', coveredMsgA:'இது முழுமையாக இலவசமாக ஈடுசெய்யப்படுகிறது —', coveredMsgB:'. கடன் தேவையில்லை.', youBorrow:'நீங்கள் கடன் வாங்குவது', claimSteps:'உரிமைகோரல் படிகளைப் பார்',
@@ -304,7 +307,7 @@ const UX = {
   },
   hi: {
     kinds:{gig_payout:'गिग भुगतान',invoice:'इनवॉइस',cash_gig:'नकद काम',salary:'वेतन'},
-    tierA:'क्रिप्टो-सत्यापित भुगतान', tierB:'संभाव्य संदर्भ मिलान', tierC:'फ़ोटो से AI द्वारा पढ़ा', overdue:'बकाया',
+    weeklyIncome:'सप्ताह अनुसार सत्यापित आय', tierA:'क्रिप्टो-सत्यापित भुगतान', tierB:'संभाव्य संदर्भ मिलान', tierC:'फ़ोटो से AI द्वारा पढ़ा', overdue:'बकाया',
     upTitle:'नई फ़ोटो अपलोड करें', upSel:'फ़ोटो चुनी गई', upHint:'कैमरा या गैलरी · JPG, PNG, PDF',
     amount:'दस्तावेज़ पर राशि', type:'प्रकार', refOpt:'संदर्भ (वैकल्पिक)', cancel:'रद्द', verifySubmit:'सत्यापित कर जमा करें',
     enterAmount:'दस्तावेज़ पर लिखी राशि दर्ज करें.', chooseFirst:'पहले फ़ोटो या PDF चुनें.', upFail:'अपलोड विफल — क्या बैकएंड चल रहा है?',
@@ -317,7 +320,7 @@ const UX = {
     needProof:'पहले आय प्रमाण जमा करें — एडवांस केवल सत्यापित आय के विरुद्ध मिलता है.',
     approved:'स्वीकृत', aprEquiv:'ब्याज समतुल्य', splitNote:'आप तक पहुँचने से पहले हिस्सों में बाँटा जाता है, ताकि किराया और ज़रूरतें पहले ही संभल जाएँ. वितरित', allocation:'आवंटन', vpa:'वर्चुअल UPI खाता', askAgain:'फिर पूछें',
     heldBack:'आपकी सुरक्षा हेतु रोका गया', deepen:'अभी एक और एडवांस गड्ढा भरने के बजाय गहरा करेगा.', betterOption:'बेहतर विकल्प, अभी तैयार', startRefi:'रीफ़ाइनेंस शुरू करें', back:'वापस', oneQ:'पहले एक सवाल', needsClarify:'स्पष्टीकरण आवश्यक.',
-    savBalance:'बचत शेष', ledgerLabel:'जमा और निकासी', noSweeps:'अभी कोई जमा नहीं. हर सत्यापित भुगतान से बचत अपने-आप बनती है.', cushionA:'का', cushionB:'कुशन · ऑटो-सेव',
+    savGrowth:'बचत वृद्धि', savBalance:'बचत शेष', ledgerLabel:'जमा और निकासी', noSweeps:'अभी कोई जमा नहीं. हर सत्यापित भुगतान से बचत अपने-आप बनती है.', cushionA:'का', cushionB:'कुशन · ऑटो-सेव',
     welfareApplied:'कल्याण ऑफ़सेट लागू', coveredFree:'मुफ़्त कवर', loan:'कर्ज़', maxCover:'अधिकतम कवर', noScheme:'इस मामले के लिए कोई योजना नहीं.', free:'मुफ़्त', sev:{critical:'गंभीर',warning:'चेतावनी'}, notIncome:'यह छवि आय प्रमाण जैसी नहीं लगती (इनवॉइस, भुगतान स्क्रीनशॉट, रसीद या वेतन पर्ची). कृपया एक वैध आय दस्तावेज़ अपलोड करें.', mismatch:(c,d)=>`आपने जो राशि दर्ज की (${fmt(c)}) वह दस्तावेज़ की राशि (${fmt(d)}) से मेल नहीं खाती. कृपया प्रमाण पर दिखाई गई राशि दर्ज करें.`, duplicate:'यह प्रमाण पहले ही जमा किया जा चुका है. एक ही भुगतान को दो बार वित्तपोषित नहीं किया जा सकता.', notCrisisTitle:'आपातकालीन बिल नहीं', notCrisisMsg:'यह छवि बिल, अस्पताल अनुमान या क्षति फ़ोटो जैसी नहीं लगती. कृपया वास्तविक आपातकालीन दस्तावेज़ अपलोड करें.', crisisChoose:'पहले एक बिल/फ़ोटो चुनें.', crisisFail:'अपलोड विफल — क्या बैकएंड चल रहा है?',
     takePhoto:'अभी फ़ोटो लें', billHint:'बिल, अस्पताल अनुमान, या क्षति', orDemo:'या एक डेमो केस चलाएँ', reading:'आपका दस्तावेज़ पढ़ा जा रहा है…', readingSub:'फिर हर उस योजना की जाँच जिसके आप पात्र हैं',
     assessment:'आकलन', goodNews:'अच्छी ख़बर', coveredMsgA:'यह पूरी तरह मुफ़्त कवर है —', coveredMsgB:'. कोई कर्ज़ नहीं चाहिए.', youBorrow:'आप उधार लेते हैं', claimSteps:'दावे के चरण देखें',
@@ -356,10 +359,13 @@ function buildReminders(detail, lang='en') {
 function MiniCalendar({ data, lang='en' }) {
   const L = I18N[lang] || I18N.en;
   const { y, m, today, reminders } = data;
+  const byDay = {}; reminders.forEach(r=>{ (byDay[r.day]=byDay[r.day]||[]).push(r); });
   const dueColor = {}; reminders.forEach(r=>{ dueColor[r.day] = r.is_debt && r.apr>0.3 ? '#B23A2C' : r.color; });
   const first = new Date(y, m, 1); const startCol = (first.getDay()+6)%7; const dim = new Date(y, m+1, 0).getDate();
   const cells = []; for (let i=0;i<startCol;i++) cells.push(null); for (let d=1;d<=dim;d++) cells.push(d);
   const WD = L.weekdays;
+  const [sel, setSel] = useState(byDay[today] ? today : (reminders[0] ? reminders[0].day : null));
+  const selBills = sel ? (byDay[sel]||[]) : [];
   return html`
   <${Card} style=${{padding:18}}>
     <div style=${{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -371,11 +377,30 @@ function MiniCalendar({ data, lang='en' }) {
       ${cells.map((d,i)=>{
         if(d===null) return html`<div key=${i}></div>`;
         const col = i%7; const weekend = col>=5; const isToday = d===today; const due = dueColor[d];
-        return html`<div key=${i} style=${{position:'relative',height:34,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-          <div style=${{width:28,height:28,borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12.5,fontWeight:isToday?800:600,fontVariantNumeric:'tabular-nums',background:isToday?'#5C83B6':'transparent',color:isToday?'#FFFDF8':weekend?'#C15A3E':'#4A4034'}}>${d}</div>
+        const hasBill = !!byDay[d]; const isSel = d===sel;
+        return html`<div key=${i} onClick=${()=>setSel(d)} title=${hasBill?byDay[d].map(b=>b.head).join(', '):''}
+          style=${{position:'relative',height:34,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',cursor:'pointer',borderRadius:9,background:isSel?'rgba(46,90,135,.10)':'transparent',boxShadow:isSel&&!isToday?'inset 0 0 0 1.5px rgba(46,90,135,.5)':'none'}}>
+          <div style=${{width:28,height:28,borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12.5,fontWeight:(isToday||isSel)?800:600,fontVariantNumeric:'tabular-nums',background:isToday?'#5C83B6':'transparent',color:isToday?'#FFFDF8':weekend?'#C15A3E':'#4A4034'}}>${d}</div>
           ${due&&!isToday?html`<span style=${{position:'absolute',bottom:3,width:5,height:5,borderRadius:'50%',background:due}}></span>`:null}
         </div>`;
       })}
+    </div>
+    <div style=${{marginTop:12,display:'flex',gap:14,flexWrap:'wrap',fontSize:10.5,color:'#8B7E6E'}}>
+      <span style=${{display:'inline-flex',alignItems:'center',gap:5}}><span style=${{width:6,height:6,borderRadius:'50%',background:'#2E5A87'}}></span>${L.legBill}</span>
+      <span style=${{display:'inline-flex',alignItems:'center',gap:5}}><span style=${{width:6,height:6,borderRadius:'50%',background:'#B23A2C'}}></span>${L.legHigh}</span>
+      <span style=${{display:'inline-flex',alignItems:'center',gap:5}}><span style=${{width:8,height:8,borderRadius:3,background:'#5C83B6'}}></span>${L.legToday}</span>
+    </div>
+    <div style=${{marginTop:12,paddingTop:12,borderTop:'1px solid #EFE7D8'}}>
+      ${selBills.length ? html`
+        <div style=${{fontSize:11,fontWeight:700,letterSpacing:'.02em',color:'#8B7E6E',marginBottom:8}}>${selBills[0].dateLabel}</div>
+        <div style=${{display:'flex',flexDirection:'column',gap:8}}>
+          ${selBills.map((b,i)=>html`<div key=${i} style=${{display:'flex',alignItems:'center',gap:10}}>
+            <span style=${{flex:'none',width:8,height:8,borderRadius:'50%',background:(b.is_debt&&b.apr>0.3)?'#B23A2C':b.color}}></span>
+            <span style=${{flex:1,minWidth:0}}><span style=${{display:'block',fontSize:12.5,fontWeight:700,color:'#241E17'}}>${b.head}</span><span style=${{fontSize:10.5,color:'#8B7E6E'}}>${b.label}${b.is_debt&&b.apr>0?' · '+Math.round(b.apr*100)+'% '+L.apr:''}</span></span>
+            <span style=${{flex:'none',fontSize:13,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(b.amount)}</span>
+          </div>`)}
+        </div>`
+      : html`<div style=${{fontSize:12,color:'#B0A290'}}>${sel?L.nothingDue:L.tapDay}</div>`}
     </div>
   <//>`;
 }
@@ -572,6 +597,19 @@ function Income({ income, lang='en' }) {
       <span><strong style=${{color:'#2E5A87'}}>B</strong> — ${ux(lang).tierB}</span>
       <span><strong style=${{color:'#A9721E'}}>C</strong> — ${ux(lang).tierC}</span>
     </div>
+    ${(()=>{ const chart=Object.entries(groups).map(([wk,rows])=>({wk,total:rows.reduce((s,e)=>s+e.gross,0)})).reverse();
+      if(chart.length<2) return null; const cmax=Math.max(1,...chart.map(c=>c.total));
+      return html`<${Card} style=${{marginBottom:16}}>
+        <${Eyebrow}>${ux(lang).weeklyIncome}<//>
+        <div style=${{marginTop:16,height:120,display:'flex',alignItems:'flex-end',gap:6,borderBottom:'1px solid #CFC3AE'}}>
+          ${chart.map((c,i)=>html`<div key=${i} title=${c.wk+': '+fmt(c.total)} style=${{flex:1,display:'flex',flexDirection:'column',justifyContent:'flex-end',height:'100%'}}>
+            <div style=${{height:Math.max(3,(c.total/cmax)*100)+'%',borderRadius:'3px 3px 0 0',background:'linear-gradient(180deg,#3D6FA0,#2E5A87)'}}></div>
+          </div>`)}
+        </div>
+        <div style=${{marginTop:6,display:'flex',justifyContent:'space-between',fontSize:9.5,color:'#B0A290',fontVariantNumeric:'tabular-nums'}}>
+          <span>${chart[0].wk}</span><span>${chart[chart.length-1].wk}</span>
+        </div>
+      <//>`; })()}
     <div style=${{display:'flex',flexDirection:'column',gap:18}}>
       ${Object.entries(groups).map(([wk,rows],i)=>{
         const total = rows.reduce((s,e)=>s+e.gross,0);
@@ -856,8 +894,28 @@ function Savings({ savings, detail, lang='en' }) {
   if (!savings) return html`<${Spinner} color="#15803d" title="Loading…" sub=""/>`;
   const bal = savings.balance||0; const target = 20000; const pct = Math.min(100, bal/target*100);
   const tx = savings.transactions||[];
+  let run = bal; const hist = [bal];
+  tx.forEach(r=>{ const a = r.amount!=null?r.amount:(r.delta||0); run -= a; hist.push(run); });
+  const series = hist.slice().reverse();
   return html`
-  <div style=${{display:'grid',gridTemplateColumns:'.9fr 1.1fr',gap:16,alignItems:'start',maxWidth:980}}>
+  <div style=${{display:'flex',flexDirection:'column',gap:16,maxWidth:980}}>
+  ${series.length>=2 ? html`<${Card}>
+    <div style=${{display:'flex',alignItems:'baseline',justifyContent:'space-between'}}>
+      <${Eyebrow} color="#6A5D4E">${U.savGrowth}<//>
+      <div style=${{fontSize:15,fontWeight:800,color:'#15803d',fontVariantNumeric:'tabular-nums'}}>${fmt(bal)}</div>
+    </div>
+    ${(()=>{ const W=640,H=120,P=6; const mn=Math.min(...series),mx=Math.max(...series,mn+1);
+      const xs=i=>P+i*((W-2*P)/(series.length-1)); const ys=v=>H-P-((v-mn)/(mx-mn))*(H-2*P);
+      const line=series.map((v,i)=>(i?'L':'M')+xs(i).toFixed(1)+' '+ys(v).toFixed(1)).join(' ');
+      const area=line+' L '+xs(series.length-1).toFixed(1)+' '+(H-P)+' L '+xs(0).toFixed(1)+' '+(H-P)+' Z';
+      return html`<svg viewBox=${'0 0 '+W+' '+H} preserveAspectRatio="none" style=${{marginTop:14,width:'100%',height:120,display:'block'}}>
+        <defs><linearGradient id="savg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16A34A" stop-opacity="0.28"/><stop offset="100%" stop-color="#16A34A" stop-opacity="0"/></linearGradient></defs>
+        <path d=${area} fill="url(#savg)"/>
+        <path d=${line} fill="none" stroke="#15803d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx=${xs(series.length-1)} cy=${ys(series[series.length-1])} r="3.5" fill="#15803d"/>
+      </svg>`; })()}
+  <//>` : null}
+  <div style=${{display:'grid',gridTemplateColumns:'.9fr 1.1fr',gap:16,alignItems:'start'}}>
     <div style=${{padding:24,borderRadius:12,border:'1px solid rgba(21,128,61,.3)',background:'#F0FDF4'}}>
       <${Eyebrow} color="#6A5D4E">${U.savBalance}<//>
       <div style=${{marginTop:8,fontSize:40,fontWeight:800,letterSpacing:'-.035em',lineHeight:1,fontVariantNumeric:'tabular-nums'}}>${fmt(bal)}</div>
@@ -875,6 +933,7 @@ function Savings({ savings, detail, lang='en' }) {
           </div>`;}) : html`<div style=${{padding:20,fontSize:13,color:'#8B7E6E',border:'1px solid #E5DAC7',borderRadius:8,background:'#FFFDF8'}}>${U.noSweeps}</div>`}
       </div>
     </div>
+  </div>
   </div>`;
 }
 
@@ -1041,6 +1100,7 @@ function Login({ workers, onLogin, lang, setLang }) {
         <span style=${{fontSize:16,fontWeight:800,letterSpacing:'-.01em'}}>Sthir <span style=${{fontWeight:600,color:'#8B7E6E'}}>· Worker portal</span></span>
       </div>
       <span style=${{flex:1}}></span>
+      <a href="/" style=${{display:'inline-flex',alignItems:'center',gap:6,marginRight:12,textDecoration:'none',fontSize:12.5,fontWeight:700,color:'#2E5A87',padding:'6px 12px',borderRadius:999,border:'1px solid #E5DAC7',background:'#FFFDF8'}}><span style=${{fontSize:15,lineHeight:1}}>‹</span>${(I18N[lang]||I18N.en).choosePortal||'Choose portal'}</a>
       <div style=${{display:'flex',gap:4,padding:4,borderRadius:999,background:'rgba(90,60,30,.05)',border:'1px solid #E5DAC7'}}>
         ${[['en','English'],['ta','தமிழ்'],['hi','हिन्दी']].map(([k,lbl])=>{ const p=langPill(lang===k); return html`<button key=${k} onClick=${()=>setLang(k)} style=${{border:0,cursor:'pointer',padding:'5px 12px',borderRadius:999,fontWeight:600,fontSize:12,background:p.bg,color:p.fg}}>${lbl}</button>`; })}
       </div>
