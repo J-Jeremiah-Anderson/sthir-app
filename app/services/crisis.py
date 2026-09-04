@@ -168,9 +168,19 @@ def handle(db: Session, worker: Worker, evidence_path: str | Path,
                           "direct_to_vendor": True}))
 
     result["decision"] = "emergency_advance_to_vendor"
+    # A simulated settlement reference. In production this is the UPI/bank UTR
+    # returned by the rail (NPCI); here it is a deterministic mock — no real
+    # money moves. Kept clearly labelled as simulated in the UI.
+    utr = "SIMUPI" + adv.id.replace("-", "")[-10:].upper()
     result["emergency_advance"] = {
         "advance_id": adv.id, "amount": disburse,
         "paid_to": f"{vendor} (direct UPI)",
+        "vendor_name": vendor,
+        "vendor_vpa": f"{vendor.split()[0].lower()}@upi" if vendor and vendor != "Vendor" else "vendor@upi",
+        "virtual_account": adv.virtual_account,
+        "utr": utr,
+        "rail": "Sthir escrow → vendor UPI (simulated)",
+        "simulated": True,
         "welfare_offset": bridge["welfare_offset"],
         "note": "Paid straight to the vendor so no existing debt can intercept it."}
     result["message"] = (
