@@ -217,6 +217,30 @@ async def submit_income(worker_id: str, file: UploadFile = File(...),
         ph = phash.combined(dest)
     except Exception:
         ph = None  # unreadable/corrupt upload - still accept, just no dedupe hash
+
+    # Double-financing guard: reject a proof that is the same (or a
+    # re-photograph) of one already submitted - by this worker OR any other.
+    if ph:
+        prior = db.execute(select(IncomeEvent).where(
+            IncomeEvent.evidence_phash.isnot(None))).scalars().all()
+        for p in prior:
+            dup, dist = phash.is_duplicate(ph, p.evidence_phash)
+            if dup:
+                same_worker = (p.worker_id == worker_id)
+                dest.unlink(missing_ok=True)
+                db.add(Event(type="fraud.duplicate_proof", subject_id=worker_id,
+                             payload={"matched_income": p.id, "distance": dist,
+                                      "same_worker": same_worker}))
+                db.commit()
+                return {
+                    "rejected": True, "reason_code": "duplicate_proof",
+                    "backend": backend, "distance": dist,
+                    "same_worker": same_worker,
+                    "reason": ("This proof has already been submitted"
+                               + ("" if same_worker else " (by another worker)")
+                               + ". The same payout can't be financed twice."),
+                }
+
     e = IncomeEvent(worker_id=worker_id, kind=kind, gross=gross,
                     reference=reference or f"UP-{uuid.uuid4().hex[:5].upper()}",
                     expected_date=dt.datetime.combine(DEMO_TODAY, dt.time()),

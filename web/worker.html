@@ -6,16 +6,32 @@
 <title>Sthir · Worker portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { margin:0; background:#F1F5F9; font-family:'Inter','Noto Sans Tamil','Noto Sans Devanagari',system-ui,sans-serif; color:#0F172A; }
-  a { color:#3E92CC; }
+  :root { --display:'Fraunces',Georgia,serif; }
+  body {
+    margin:0; color:#241E17;
+    font-family:'Plus Jakarta Sans','Noto Sans Tamil','Noto Sans Devanagari',system-ui,sans-serif;
+    /* warm cotton ground with a faint woven weave */
+    background-color:#F3EDE1;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(90,60,30,.035) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(90deg, rgba(90,60,30,.035) 0 1px, transparent 1px 4px);
+  }
+  a { color:#2E5A87; }
   button { font-family:inherit; }
   @keyframes sthirRise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
   @keyframes sthirPulse { 0%,100% { opacity:.55; } 50% { opacity:1; } }
   @keyframes sthirFill { from { transform:scaleX(0); } to { transform:scaleX(1); } }
   @keyframes sthirSpin { to { transform:rotate(360deg); } }
-  *::-webkit-scrollbar { width:10px; height:10px; } *::-webkit-scrollbar-thumb { background:rgba(15,23,42,.15); border-radius:6px; }
+  /* the resilience gauge "settles" into place like a balance finding level */
+  @keyframes sthirSettle {
+    0% { transform:rotate(-9deg) scale(.92); opacity:0; }
+    55% { transform:rotate(4deg) scale(1.02); opacity:1; }
+    78% { transform:rotate(-2deg) scale(1); }
+    100% { transform:rotate(0) scale(1); }
+  }
+  *::-webkit-scrollbar { width:10px; height:10px; } *::-webkit-scrollbar-thumb { background:rgba(90,60,30,.22); border-radius:6px; }
 </style>
 </head>
 <body>
@@ -39,20 +55,20 @@ const fmt = n => { const x = Number(n); return Number.isFinite(x) ? '₹' + Math
 
 /* ---------- design tokens ---------- */
 const BAND = {
-  critical:{ color:'#DC2626', tint:'rgba(220,38,38,.12)', ring:'rgba(220,38,38,.35)' },
-  fragile:{ color:'#b45309', tint:'rgba(217,119,6,.12)', ring:'rgba(217,119,6,.35)' },
-  building:{ color:'#3E92CC', tint:'rgba(62,146,204,.12)', ring:'rgba(62,146,204,.35)' },
+  critical:{ color:'#B23A2C', tint:'rgba(178,58,44,.12)', ring:'rgba(178,58,44,.35)' },
+  fragile:{ color:'#A9721E', tint:'rgba(169,114,30,.12)', ring:'rgba(169,114,30,.35)' },
+  building:{ color:'#2E5A87', tint:'rgba(46,90,135,.12)', ring:'rgba(46,90,135,.35)' },
   resilient:{ color:'#15803d', tint:'rgba(21,128,61,.12)', ring:'rgba(21,128,61,.35)' },
 };
 const bandOf = k => BAND[k] || BAND.building;
 const SEV = {
-  critical:{ color:'#DC2626', tint:'rgba(220,38,38,.12)', ring:'rgba(220,38,38,.4)' },
-  warning:{ color:'#b45309', tint:'rgba(217,119,6,.1)', ring:'rgba(217,119,6,.35)' },
+  critical:{ color:'#B23A2C', tint:'rgba(178,58,44,.12)', ring:'rgba(178,58,44,.4)' },
+  warning:{ color:'#A9721E', tint:'rgba(169,114,30,.1)', ring:'rgba(169,114,30,.35)' },
 };
 const TIER = {
   A:{ color:'#15803d', tint:'rgba(21,128,61,.12)', ring:'rgba(21,128,61,.32)' },
-  B:{ color:'#3E92CC', tint:'rgba(62,146,204,.12)', ring:'rgba(62,146,204,.32)' },
-  C:{ color:'#b45309', tint:'rgba(217,119,6,.11)', ring:'rgba(217,119,6,.32)' },
+  B:{ color:'#2E5A87', tint:'rgba(46,90,135,.12)', ring:'rgba(46,90,135,.32)' },
+  C:{ color:'#A9721E', tint:'rgba(169,114,30,.11)', ring:'rgba(169,114,30,.32)' },
 };
 const tierOf = t => TIER[t] || TIER.C;
 
@@ -94,10 +110,10 @@ const Spinner = ({color, title, sub}) => html`
   <div style=${{padding:'70px 20px',textAlign:'center'}}>
     <div style=${{margin:'0 auto',width:70,height:70,borderRadius:'50%',border:'3px solid '+color+'33',borderTopColor:color,animation:'sthirSpin 1s linear infinite'}}></div>
     <div style=${{marginTop:22,fontSize:15,fontWeight:700}}>${title}</div>
-    <div style=${{marginTop:6,fontSize:12,color:'#475569'}}>${sub}</div>
+    <div style=${{marginTop:6,fontSize:12,color:'#6A5D4E'}}>${sub}</div>
   </div>`;
-const Card = ({children, style}) => html`<div style=${{padding:20,borderRadius:16,border:'1px solid #EEF2F6',background:'#FFFFFF',boxShadow:'0 1px 2px rgba(15,23,42,.04), 0 10px 26px -20px rgba(15,23,42,.35)',...(style||{})}}>${children}</div>`;
-const Eyebrow = ({children, color}) => html`<div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:color||'#64748B'}}>${children}</div>`;
+const Card = ({children, style}) => html`<div style=${{padding:20,borderRadius:16,border:'1px solid #EBE3D3',background:'#FFFDF8',boxShadow:'0 1px 2px rgba(90,60,30,.04), 0 10px 26px -20px rgba(90,60,30,.35)',...(style||{})}}>${children}</div>`;
+const Eyebrow = ({children, color}) => html`<div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:color||'#8B7E6E'}}>${children}</div>`;
 
 /* ---------- extended translations (calendar, reminders, data labels) ---------- */
 const I18N = {
@@ -257,7 +273,7 @@ const UX = {
     approved:'Approved', aprEquiv:'APR equiv', splitNote:'Split into buckets before it reaches you, so rent and essentials are already handled. Net disbursed', allocation:'Allocation', vpa:'Virtual UPI account', askAgain:'Ask again',
     heldBack:'Held back to protect you', deepen:'Another advance now would deepen the hole, not fill it.', betterOption:'Better option, ready now', startRefi:'Start the refinance', back:'Back', oneQ:'One question first', needsClarify:'Needs clarification.',
     savBalance:'Savings balance', ledgerLabel:'Sweeps and drawdowns', noSweeps:'No sweeps yet. Savings build automatically from each verified payout.', cushionA:'of a', cushionB:'cushion · auto-save',
-    welfareApplied:'Welfare offset applied', coveredFree:'covered free', loan:'loan', maxCover:'Max cover', noScheme:'No matching scheme for this case.', free:'Free', sev:{critical:'Critical',warning:'Warning'}, notIncome:"This image doesn't look like a proof of income (invoice, payout screenshot, receipt or payslip). Please upload a valid income document.", mismatch:(c,d)=>`The amount you entered (${fmt(c)}) doesn't match the document (${fmt(d)}). Enter the amount shown on the proof.`, notCrisisTitle:'Not an emergency bill', notCrisisMsg:"This image doesn't look like a bill, hospital estimate or damage photo. Please upload the actual emergency document.", crisisChoose:'Choose a bill / photo first.', crisisFail:'Upload failed — is the backend running?',
+    welfareApplied:'Welfare offset applied', coveredFree:'covered free', loan:'loan', maxCover:'Max cover', noScheme:'No matching scheme for this case.', free:'Free', sev:{critical:'Critical',warning:'Warning'}, notIncome:"This image doesn't look like a proof of income (invoice, payout screenshot, receipt or payslip). Please upload a valid income document.", mismatch:(c,d)=>`The amount you entered (${fmt(c)}) doesn't match the document (${fmt(d)}). Enter the amount shown on the proof.`, duplicate:'This proof has already been submitted. The same payout cannot be financed twice.', notCrisisTitle:'Not an emergency bill', notCrisisMsg:"This image doesn't look like a bill, hospital estimate or damage photo. Please upload the actual emergency document.", crisisChoose:'Choose a bill / photo first.', crisisFail:'Upload failed — is the backend running?',
     takePhoto:'Take a photo now', billHint:'Bill, hospital estimate, or damage', orDemo:'Or run a demo case', reading:'Reading your document…', readingSub:'Then checking every scheme you qualify for',
     assessment:'Assessment', goodNews:'Good news', coveredMsgA:'This is fully covered for free by', coveredMsgB:'. No loan needed.', youBorrow:'You borrow', claimSteps:'See the claim steps',
     emgSent:'Emergency advance sent', paidTo:'Paid', directlyTo:'directly to', overUpi:'over UPI.', repayNote:"Repayment starts from next week's verified payout.", runAnother:'Run another case',
@@ -278,7 +294,7 @@ const UX = {
     approved:'அங்கீகரிக்கப்பட்டது', aprEquiv:'வட்டி சமம்', splitNote:'உங்களை அடைவதற்கு முன் பிரிக்கப்படுகிறது, வாடகையும் அத்தியாவசியமும் ஏற்கனவே கவனிக்கப்படுகின்றன. வழங்கப்பட்டது', allocation:'ஒதுக்கீடு', vpa:'மெய்நிகர் UPI கணக்கு', askAgain:'மீண்டும் கேள்',
     heldBack:'உங்களைப் பாதுகாக்க தடுக்கப்பட்டது', deepen:'இப்போது மற்றொரு முன்பணம் பள்ளத்தை நிரப்பாது, ஆழமாக்கும்.', betterOption:'சிறந்த வழி, இப்போது தயார்', startRefi:'மறுநிதியளிப்பைத் தொடங்கு', back:'பின்', oneQ:'முதலில் ஒரு கேள்வி', needsClarify:'தெளிவுபடுத்த வேண்டும்.',
     savBalance:'சேமிப்பு இருப்பு', ledgerLabel:'சேமிப்பு மற்றும் எடுப்பு', noSweeps:'இன்னும் சேமிப்பு இல்லை. ஒவ்வொரு சரிபார்க்கப்பட்ட வரவிலிருந்தும் சேமிப்பு தானாக உருவாகும்.', cushionA:'இதன்', cushionB:'பாதுகாப்பு · தானியங்கு சேமிப்பு',
-    welfareApplied:'நல ஈடு பயன்படுத்தப்பட்டது', coveredFree:'இலவசமாக ஈடு', loan:'கடன்', maxCover:'அதிகபட்ச காப்பீடு', noScheme:'இந்நிலைக்கு பொருந்தும் திட்டம் இல்லை.', free:'இலவசம்', sev:{critical:'மிக அவசரம்',warning:'எச்சரிக்கை'}, notIncome:'இந்தப் படம் வருமானச் சான்று போல் இல்லை (இன்வாய்ஸ், பணம் ஸ்கிரீன்ஷாட், ரசீது அல்லது சம்பளச் சீட்டு). சரியான வருமான ஆவணத்தைப் பதிவேற்றவும்.', mismatch:(c,d)=>`நீங்கள் உள்ளிட்ட தொகை (${fmt(c)}) ஆவணத்தில் உள்ள தொகையுடன் (${fmt(d)}) பொருந்தவில்லை. சான்றில் காட்டப்பட்ட தொகையை உள்ளிடவும்.`, notCrisisTitle:'அவசர பில் அல்ல', notCrisisMsg:'இந்தப் படம் பில், மருத்துவமனை மதிப்பீடு அல்லது சேதப் படம் போல் இல்லை. உண்மையான அவசர ஆவணத்தைப் பதிவேற்றவும்.', crisisChoose:'முதலில் ஒரு பில்/படம் தேர்ந்தெடு.', crisisFail:'பதிவேற்றம் தோல்வி — பின்தளம் இயங்குகிறதா?',
+    welfareApplied:'நல ஈடு பயன்படுத்தப்பட்டது', coveredFree:'இலவசமாக ஈடு', loan:'கடன்', maxCover:'அதிகபட்ச காப்பீடு', noScheme:'இந்நிலைக்கு பொருந்தும் திட்டம் இல்லை.', free:'இலவசம்', sev:{critical:'மிக அவசரம்',warning:'எச்சரிக்கை'}, notIncome:'இந்தப் படம் வருமானச் சான்று போல் இல்லை (இன்வாய்ஸ், பணம் ஸ்கிரீன்ஷாட், ரசீது அல்லது சம்பளச் சீட்டு). சரியான வருமான ஆவணத்தைப் பதிவேற்றவும்.', mismatch:(c,d)=>`நீங்கள் உள்ளிட்ட தொகை (${fmt(c)}) ஆவணத்தில் உள்ள தொகையுடன் (${fmt(d)}) பொருந்தவில்லை. சான்றில் காட்டப்பட்ட தொகையை உள்ளிடவும்.`, duplicate:'இந்தச் சான்று ஏற்கனவே சமர்ப்பிக்கப்பட்டது. ஒரே பணத்தை இருமுறை நிதியளிக்க முடியாது.', notCrisisTitle:'அவசர பில் அல்ல', notCrisisMsg:'இந்தப் படம் பில், மருத்துவமனை மதிப்பீடு அல்லது சேதப் படம் போல் இல்லை. உண்மையான அவசர ஆவணத்தைப் பதிவேற்றவும்.', crisisChoose:'முதலில் ஒரு பில்/படம் தேர்ந்தெடு.', crisisFail:'பதிவேற்றம் தோல்வி — பின்தளம் இயங்குகிறதா?',
     takePhoto:'இப்போது புகைப்படம் எடு', billHint:'பில், மருத்துவமனை மதிப்பீடு, அல்லது சேதம்', orDemo:'அல்லது ஒரு டெமோ வழக்கை இயக்கு', reading:'உங்கள் ஆவணத்தைப் படிக்கிறது…', readingSub:'பின் நீங்கள் தகுதியுள்ள ஒவ்வொரு திட்டத்தையும் சரிபார்க்கிறது',
     assessment:'மதிப்பீடு', goodNews:'நற்செய்தி', coveredMsgA:'இது முழுமையாக இலவசமாக ஈடுசெய்யப்படுகிறது —', coveredMsgB:'. கடன் தேவையில்லை.', youBorrow:'நீங்கள் கடன் வாங்குவது', claimSteps:'உரிமைகோரல் படிகளைப் பார்',
     emgSent:'அவசர முன்பணம் அனுப்பப்பட்டது', paidTo:'செலுத்தப்பட்டது', directlyTo:'நேரடியாக', overUpi:'UPI மூலம்.', repayNote:'அடுத்த வார சரிபார்க்கப்பட்ட வரவிலிருந்து திருப்பிச் செலுத்தல் தொடங்கும்.', runAnother:'மற்றொரு வழக்கை இயக்கு',
@@ -299,7 +315,7 @@ const UX = {
     approved:'स्वीकृत', aprEquiv:'ब्याज समतुल्य', splitNote:'आप तक पहुँचने से पहले हिस्सों में बाँटा जाता है, ताकि किराया और ज़रूरतें पहले ही संभल जाएँ. वितरित', allocation:'आवंटन', vpa:'वर्चुअल UPI खाता', askAgain:'फिर पूछें',
     heldBack:'आपकी सुरक्षा हेतु रोका गया', deepen:'अभी एक और एडवांस गड्ढा भरने के बजाय गहरा करेगा.', betterOption:'बेहतर विकल्प, अभी तैयार', startRefi:'रीफ़ाइनेंस शुरू करें', back:'वापस', oneQ:'पहले एक सवाल', needsClarify:'स्पष्टीकरण आवश्यक.',
     savBalance:'बचत शेष', ledgerLabel:'जमा और निकासी', noSweeps:'अभी कोई जमा नहीं. हर सत्यापित भुगतान से बचत अपने-आप बनती है.', cushionA:'का', cushionB:'कुशन · ऑटो-सेव',
-    welfareApplied:'कल्याण ऑफ़सेट लागू', coveredFree:'मुफ़्त कवर', loan:'कर्ज़', maxCover:'अधिकतम कवर', noScheme:'इस मामले के लिए कोई योजना नहीं.', free:'मुफ़्त', sev:{critical:'गंभीर',warning:'चेतावनी'}, notIncome:'यह छवि आय प्रमाण जैसी नहीं लगती (इनवॉइस, भुगतान स्क्रीनशॉट, रसीद या वेतन पर्ची). कृपया एक वैध आय दस्तावेज़ अपलोड करें.', mismatch:(c,d)=>`आपने जो राशि दर्ज की (${fmt(c)}) वह दस्तावेज़ की राशि (${fmt(d)}) से मेल नहीं खाती. कृपया प्रमाण पर दिखाई गई राशि दर्ज करें.`, notCrisisTitle:'आपातकालीन बिल नहीं', notCrisisMsg:'यह छवि बिल, अस्पताल अनुमान या क्षति फ़ोटो जैसी नहीं लगती. कृपया वास्तविक आपातकालीन दस्तावेज़ अपलोड करें.', crisisChoose:'पहले एक बिल/फ़ोटो चुनें.', crisisFail:'अपलोड विफल — क्या बैकएंड चल रहा है?',
+    welfareApplied:'कल्याण ऑफ़सेट लागू', coveredFree:'मुफ़्त कवर', loan:'कर्ज़', maxCover:'अधिकतम कवर', noScheme:'इस मामले के लिए कोई योजना नहीं.', free:'मुफ़्त', sev:{critical:'गंभीर',warning:'चेतावनी'}, notIncome:'यह छवि आय प्रमाण जैसी नहीं लगती (इनवॉइस, भुगतान स्क्रीनशॉट, रसीद या वेतन पर्ची). कृपया एक वैध आय दस्तावेज़ अपलोड करें.', mismatch:(c,d)=>`आपने जो राशि दर्ज की (${fmt(c)}) वह दस्तावेज़ की राशि (${fmt(d)}) से मेल नहीं खाती. कृपया प्रमाण पर दिखाई गई राशि दर्ज करें.`, duplicate:'यह प्रमाण पहले ही जमा किया जा चुका है. एक ही भुगतान को दो बार वित्तपोषित नहीं किया जा सकता.', notCrisisTitle:'आपातकालीन बिल नहीं', notCrisisMsg:'यह छवि बिल, अस्पताल अनुमान या क्षति फ़ोटो जैसी नहीं लगती. कृपया वास्तविक आपातकालीन दस्तावेज़ अपलोड करें.', crisisChoose:'पहले एक बिल/फ़ोटो चुनें.', crisisFail:'अपलोड विफल — क्या बैकएंड चल रहा है?',
     takePhoto:'अभी फ़ोटो लें', billHint:'बिल, अस्पताल अनुमान, या क्षति', orDemo:'या एक डेमो केस चलाएँ', reading:'आपका दस्तावेज़ पढ़ा जा रहा है…', readingSub:'फिर हर उस योजना की जाँच जिसके आप पात्र हैं',
     assessment:'आकलन', goodNews:'अच्छी ख़बर', coveredMsgA:'यह पूरी तरह मुफ़्त कवर है —', coveredMsgB:'. कोई कर्ज़ नहीं चाहिए.', youBorrow:'आप उधार लेते हैं', claimSteps:'दावे के चरण देखें',
     emgSent:'आपातकालीन एडवांस भेजा गया', paidTo:'भुगतान', directlyTo:'सीधे', overUpi:'UPI द्वारा.', repayNote:'चुकौती अगले सप्ताह के सत्यापित भुगतान से शुरू होगी.', runAnother:'दूसरा केस चलाएँ',
@@ -310,8 +326,8 @@ const ux = (lang) => UX[lang] || UX.en;
 
 /* ---------- reminders derived from real recurring obligations ---------- */
 const BILL_META = {
-  rent:     { day:5,  color:'#3E92CC', tint:'#E4F0F9' },
-  emi:      { day:10, color:'#DC2626', tint:'rgba(220,38,38,.10)' },
+  rent:     { day:5,  color:'#2E5A87', tint:'#E4F0F9' },
+  emi:      { day:10, color:'#B23A2C', tint:'rgba(178,58,44,.10)' },
   utility:  { day:18, color:'#C08A2E', tint:'#FBF1DC' },
   input:    { day:20, color:'#15803d', tint:'#E3F3E8' },
   family:   { day:26, color:'#7C5CD6', tint:'rgba(124,92,214,.12)' },
@@ -337,7 +353,7 @@ function buildReminders(detail, lang='en') {
 function MiniCalendar({ data, lang='en' }) {
   const L = I18N[lang] || I18N.en;
   const { y, m, today, reminders } = data;
-  const dueColor = {}; reminders.forEach(r=>{ dueColor[r.day] = r.is_debt && r.apr>0.3 ? '#DC2626' : r.color; });
+  const dueColor = {}; reminders.forEach(r=>{ dueColor[r.day] = r.is_debt && r.apr>0.3 ? '#B23A2C' : r.color; });
   const first = new Date(y, m, 1); const startCol = (first.getDay()+6)%7; const dim = new Date(y, m+1, 0).getDate();
   const cells = []; for (let i=0;i<startCol;i++) cells.push(null); for (let d=1;d<=dim;d++) cells.push(d);
   const WD = L.weekdays;
@@ -345,15 +361,15 @@ function MiniCalendar({ data, lang='en' }) {
   <${Card} style=${{padding:18}}>
     <div style=${{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div style=${{fontSize:15,fontWeight:800,letterSpacing:'-.01em'}}>${L.calendar}</div>
-      <div style=${{fontSize:12.5,fontWeight:600,color:'#64748B'}}>${L.months[m]} ${y}</div>
+      <div style=${{fontSize:12.5,fontWeight:600,color:'#8B7E6E'}}>${L.months[m]} ${y}</div>
     </div>
     <div style=${{marginTop:14,display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:2,textAlign:'center'}}>
-      ${WD.map((d,i)=>html`<div key=${'h'+i} style=${{fontSize:10,fontWeight:700,letterSpacing:'.03em',textTransform:'uppercase',color:'#94A3B8',paddingBottom:6}}>${d}</div>`)}
+      ${WD.map((d,i)=>html`<div key=${'h'+i} style=${{fontSize:10,fontWeight:700,letterSpacing:'.03em',textTransform:'uppercase',color:'#B0A290',paddingBottom:6}}>${d}</div>`)}
       ${cells.map((d,i)=>{
         if(d===null) return html`<div key=${i}></div>`;
         const col = i%7; const weekend = col>=5; const isToday = d===today; const due = dueColor[d];
         return html`<div key=${i} style=${{position:'relative',height:34,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-          <div style=${{width:28,height:28,borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12.5,fontWeight:isToday?800:600,fontVariantNumeric:'tabular-nums',background:isToday?'#5BA4CF':'transparent',color:isToday?'#FFFFFF':weekend?'#E0654F':'#334155'}}>${d}</div>
+          <div style=${{width:28,height:28,borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12.5,fontWeight:isToday?800:600,fontVariantNumeric:'tabular-nums',background:isToday?'#5C83B6':'transparent',color:isToday?'#FFFDF8':weekend?'#C15A3E':'#4A4034'}}>${d}</div>
           ${due&&!isToday?html`<span style=${{position:'absolute',bottom:3,width:5,height:5,borderRadius:'50%',background:due}}></span>`:null}
         </div>`;
       })}
@@ -368,24 +384,24 @@ function Reminders({ data, lang='en' }) {
   <${Card} style=${{padding:18}}>
     <div style=${{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div style=${{fontSize:15,fontWeight:800,letterSpacing:'-.01em'}}>${L.reminders}</div>
-      <span style=${{fontSize:11,fontWeight:700,color:'#64748B'}}>${reminders.length} ${L.bills}</span>
+      <span style=${{fontSize:11,fontWeight:700,color:'#8B7E6E'}}>${reminders.length} ${L.bills}</span>
     </div>
     <div style=${{marginTop:14,display:'flex',flexDirection:'column',gap:9}}>
       ${reminders.length ? reminders.map((r,i)=>{
         const predatory = r.is_debt && r.apr>0.3;
         return html`
-        <div key=${i} style=${{display:'flex',alignItems:'center',gap:12,padding:'11px 12px',borderRadius:12,border:'1px solid #EEF2F6',background:'#FBFCFE'}}>
+        <div key=${i} style=${{display:'flex',alignItems:'center',gap:12,padding:'11px 12px',borderRadius:12,border:'1px solid #EBE3D3',background:'#FDFAF3'}}>
           <span style=${{flex:'none',width:38,height:38,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',background:r.tint,color:r.color,fontSize:15,fontWeight:800}}>${fmt(r.amount).replace('₹','').slice(0,1)==='—'?'₹':'₹'}</span>
           <span style=${{flex:1,minWidth:0}}>
             <span style=${{display:'block',fontSize:13,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>${r.head}</span>
-            <span style=${{display:'block',marginTop:2,fontSize:11,color:'#64748B'}}>${r.label} · ${fmt(r.amount)}${L.mo}</span>
+            <span style=${{display:'block',marginTop:2,fontSize:11,color:'#8B7E6E'}}>${r.label} · ${fmt(r.amount)}${L.mo}</span>
           </span>
           <span style=${{flex:'none',textAlign:'right'}}>
-            <span style=${{display:'inline-block',padding:'3px 8px',borderRadius:999,background:'#EEF3F8',color:'#334155',fontSize:11,fontWeight:700,fontVariantNumeric:'tabular-nums'}}>${r.dateLabel}</span>
-            ${predatory?html`<span style=${{display:'block',marginTop:3,fontSize:9,fontWeight:800,letterSpacing:'.06em',textTransform:'uppercase',color:'#DC2626'}}>${Math.round(r.apr*100)}% ${L.apr}</span>`:null}
+            <span style=${{display:'inline-block',padding:'3px 8px',borderRadius:999,background:'#EDE6D6',color:'#4A4034',fontSize:11,fontWeight:700,fontVariantNumeric:'tabular-nums'}}>${r.dateLabel}</span>
+            ${predatory?html`<span style=${{display:'block',marginTop:3,fontSize:9,fontWeight:800,letterSpacing:'.06em',textTransform:'uppercase',color:'#B23A2C'}}>${Math.round(r.apr*100)}% ${L.apr}</span>`:null}
           </span>
         </div>`;
-      }) : html`<div style=${{padding:16,fontSize:12.5,color:'#64748B',textAlign:'center'}}>—</div>`}
+      }) : html`<div style=${{padding:16,fontSize:12.5,color:'#8B7E6E',textAlign:'center'}}>—</div>`}
     </div>
   <//>`;
 }
@@ -395,14 +411,14 @@ function Reminders({ data, lang='en' }) {
    ===================================================================== */
 function Dashboard({ t, detail, onGo, lang='en' }) {
   const L2 = I18N[lang] || I18N.en;
-  if (!detail) return html`<${Spinner} color="#3E92CC" title="Loading…" sub=""/>`;
+  if (!detail) return html`<${Spinner} color="#2E5A87" title="Loading…" sub=""/>`;
   const r = detail.resilience, b = bandOf(r.resilience_band);
   const weekly = r.weekly_income||[]; const mx = Math.max(1, ...weekly);
   const debt = r.obligations.debt_service||0, total = r.obligations.total||1;
   const essPart = Math.max(0, total-debt);
   const subs = ['runway','savings','stability','coverage'].map(k=>{
     const v = r.sub_scores[k]||0;
-    const col = v<30?'#DC2626':v<55?'#b45309':v<75?'#3E92CC':'#15803d';
+    const col = v<30?'#B23A2C':v<55?'#A9721E':v<75?'#2E5A87':'#15803d';
     return { label:t.subLabels[k], val:v, pct:v+'%', color:col };
   });
   const openAlerts = (detail.alerts||[]).length;
@@ -411,35 +427,35 @@ function Dashboard({ t, detail, onGo, lang='en' }) {
   const billData = buildReminders(detail, lang);
   return html`
   <div style=${{display:'flex',flexDirection:'column',gap:16}}>
-    <div style=${{position:'relative',overflow:'hidden',borderRadius:18,padding:'30px 32px',background:'linear-gradient(105deg,#1F2A44 0%,#25334F 55%,#2C3C5C 100%)',color:'#FFFFFF'}}>
+    <div style=${{position:'relative',overflow:'hidden',borderRadius:18,padding:'30px 32px',background:'linear-gradient(105deg,#233150 0%,#293B5C 55%,#31456A 100%)',color:'#FFFDF8'}}>
       <div style=${{position:'absolute',right:150,top:20,width:190,height:230,borderRadius:'120px 120px 0 0',background:'rgba(91,164,207,.28)'}}></div>
       <div style=${{position:'absolute',right:70,top:44,width:170,height:210,borderRadius:'110px 110px 0 0',background:'rgba(120,200,227,.22)'}}></div>
       <div style=${{position:'absolute',right:0,top:64,width:150,height:190,borderRadius:'100px 100px 0 0',background:'rgba(190,180,120,.28)'}}></div>
       <div style=${{position:'relative',zIndex:1}}>
-        <div style=${{fontSize:27,fontWeight:800,letterSpacing:'-.02em'}}>${greet}, ${detail.name}</div>
-        <div style=${{marginTop:7,fontSize:13.5,color:'rgba(255,255,255,.78)'}}>${heroSub.split('§N§').flatMap((part,i)=> i===0 ? [part] : [html`<strong key=${i} style=${{color:'#FFFFFF'}}>${openAlerts}</strong>`, part])}</div>
-        <button onClick=${()=>onGo('alerts')} style=${{marginTop:20,display:'inline-flex',alignItems:'center',gap:8,cursor:'pointer',padding:'10px 18px',borderRadius:10,border:0,background:'#FFFFFF',color:'#1F2A44',font:'700 13px inherit'}}>${L2.heroBtn} <span style=${{fontSize:15}}>›</span></button>
+        <div style=${{fontFamily:"'Fraunces',Georgia,serif",fontSize:29,fontWeight:600,letterSpacing:'-.01em'}}>${greet}, ${detail.name}</div>
+        <div style=${{marginTop:7,fontSize:13.5,color:'rgba(255,255,255,.78)'}}>${heroSub.split('§N§').flatMap((part,i)=> i===0 ? [part] : [html`<strong key=${i} style=${{color:'#FFFDF8'}}>${openAlerts}</strong>`, part])}</div>
+        <button onClick=${()=>onGo('alerts')} style=${{marginTop:20,display:'inline-flex',alignItems:'center',gap:8,cursor:'pointer',padding:'10px 18px',borderRadius:10,border:0,background:'#FFFDF8',color:'#233150',font:'700 13px inherit'}}>${L2.heroBtn} <span style=${{fontSize:15}}>›</span></button>
       </div>
     </div>
   <div style=${{display:'grid',gridTemplateColumns:'1.1fr .9fr',gap:16,alignItems:'start'}}>
     <div style=${{display:'flex',flexDirection:'column',gap:16}}>
       <${Card} style=${{padding:24}}>
         <div style=${{display:'flex',alignItems:'center',gap:24}}>
-          <div style=${{flex:'none',position:'relative',width:150,height:150,borderRadius:'50%',background:'conic-gradient('+b.color+' '+(r.resilience_score*3.6)+'deg, rgba(15,23,42,.06) 0)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <div style=${{position:'absolute',inset:12,borderRadius:'50%',background:'#FFF',border:'1px solid #E5E7EB'}}></div>
+          <div style=${{flex:'none',position:'relative',width:150,height:150,borderRadius:'50%',background:'conic-gradient('+b.color+' '+(r.resilience_score*3.6)+'deg, rgba(90,60,30,.08) 0)',display:'flex',alignItems:'center',justifyContent:'center',animation:'sthirSettle 1s cubic-bezier(.2,.85,.25,1) both'}}>
+            <div style=${{position:'absolute',inset:12,borderRadius:'50%',background:'#FFFDF8',border:'1px solid #E5DAC7'}}></div>
             <div style=${{position:'relative',textAlign:'center'}}>
-              <div style=${{fontSize:46,fontWeight:800,letterSpacing:'-.04em',lineHeight:1,color:b.color,fontVariantNumeric:'tabular-nums'}}>${r.resilience_score}</div>
-              <div style=${{marginTop:2,fontSize:9,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:'#64748B'}}>/ 100</div>
+              <div style=${{fontFamily:"'Fraunces',Georgia,serif",fontSize:48,fontWeight:600,letterSpacing:'-.02em',lineHeight:1,color:b.color,fontVariantNumeric:'tabular-nums'}}>${r.resilience_score}</div>
+              <div style=${{marginTop:2,fontSize:9,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:'#8B7E6E'}}>/ 100</div>
             </div>
           </div>
           <div style=${{flex:1,minWidth:0}}>
             <div style=${{display:'inline-flex',padding:'5px 12px',borderRadius:999,background:b.tint,border:'1px solid '+b.ring,fontSize:12,fontWeight:700,color:b.color}}>${t.bands[r.resilience_band]}</div>
-            <div style=${{marginTop:14,fontSize:12.5,color:'#475569'}}>${t.runwayLine}</div>
+            <div style=${{marginTop:14,fontSize:12.5,color:'#6A5D4E'}}>${t.runwayLine}</div>
             <div style=${{display:'flex',alignItems:'baseline',gap:6}}>
               <span style=${{fontSize:34,fontWeight:800,letterSpacing:'-.03em',fontVariantNumeric:'tabular-nums'}}>${Math.round(r.runway_days)}</span>
-              <span style=${{fontSize:13,fontWeight:600,color:'#334155'}}>${t.days}</span>
+              <span style=${{fontSize:13,fontWeight:600,color:'#4A4034'}}>${t.days}</span>
             </div>
-            <div style=${{marginTop:12,paddingTop:12,borderTop:'1px solid #E5E7EB',fontSize:12.5,lineHeight:1.55,color:'#334155'}}>
+            <div style=${{marginTop:12,paddingTop:12,borderTop:'1px solid #E5DAC7',fontSize:12.5,lineHeight:1.55,color:'#4A4034'}}>
               ${trMap(L2.occ, detail.occupation)} · ${trMap(L2.city, detail.city)} · ${L2.monthEst} ${fmt(r.monthly_income_est)}
             </div>
           </div>
@@ -450,11 +466,11 @@ function Dashboard({ t, detail, onGo, lang='en' }) {
           <${Eyebrow}>${t.income12}<//>
           <div style=${{textAlign:'right'}}>
             <div style=${{fontSize:17,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(r.monthly_income_est)}</div>
-            <div style=${{fontSize:10,color:'#64748B'}}>${t.weeklyAvg}</div>
+            <div style=${{fontSize:10,color:'#8B7E6E'}}>${t.weeklyAvg}</div>
           </div>
         </div>
-        <div style=${{marginTop:16,height:110,display:'flex',alignItems:'flex-end',gap:6,borderBottom:'1px solid #CBD5E1'}}>
-          ${weekly.map((v,i)=>html`<div key=${i} style=${{flex:1,height:(Math.max(3,(v/mx)*100))+'%',borderRadius:'2px 2px 0 0',background:'#3E92CC',opacity:v>0?0.9:0.15}}></div>`)}
+        <div style=${{marginTop:16,height:110,display:'flex',alignItems:'flex-end',gap:6,borderBottom:'1px solid #CFC3AE'}}>
+          ${weekly.map((v,i)=>html`<div key=${i} style=${{flex:1,height:(Math.max(3,(v/mx)*100))+'%',borderRadius:'2px 2px 0 0',background:'#2E5A87',opacity:v>0?0.9:0.15}}></div>`)}
         </div>
       <//>
       <${Card}>
@@ -462,13 +478,13 @@ function Dashboard({ t, detail, onGo, lang='en' }) {
           <${Eyebrow}>${t.obligations}<//>
           <div style=${{fontSize:15,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(total)}</div>
         </div>
-        <div style=${{marginTop:14,display:'flex',height:12,borderRadius:999,overflow:'hidden',background:'rgba(15,23,42,.06)'}}>
+        <div style=${{marginTop:14,display:'flex',height:12,borderRadius:999,overflow:'hidden',background:'rgba(90,60,30,.06)'}}>
           <div style=${{width:(essPart/total*100)+'%',background:'#16A34A'}}></div>
-          <div style=${{width:(debt/total*100)+'%',background:'linear-gradient(90deg,#DC2626,#e0644c)'}}></div>
+          <div style=${{width:(debt/total*100)+'%',background:'linear-gradient(90deg,#B23A2C,#e0644c)'}}></div>
         </div>
         <div style=${{marginTop:12,display:'flex',gap:24}}>
-          <div style=${{display:'flex',alignItems:'center',gap:8,fontSize:12}}><span style=${{width:8,height:8,borderRadius:3,background:'#15803d'}}></span><span style=${{color:'#334155'}}>${t.essential}</span><span style=${{fontWeight:700}}>${fmt(essPart)}</span></div>
-          <div style=${{display:'flex',alignItems:'center',gap:8,fontSize:12}}><span style=${{width:8,height:8,borderRadius:3,background:'#DC2626'}}></span><span style=${{color:'#334155'}}>${t.debtService}</span><span style=${{fontWeight:700}}>${fmt(debt)}</span></div>
+          <div style=${{display:'flex',alignItems:'center',gap:8,fontSize:12}}><span style=${{width:8,height:8,borderRadius:3,background:'#15803d'}}></span><span style=${{color:'#4A4034'}}>${t.essential}</span><span style=${{fontWeight:700}}>${fmt(essPart)}</span></div>
+          <div style=${{display:'flex',alignItems:'center',gap:8,fontSize:12}}><span style=${{width:8,height:8,borderRadius:3,background:'#B23A2C'}}></span><span style=${{color:'#4A4034'}}>${t.debtService}</span><span style=${{fontWeight:700}}>${fmt(debt)}</span></div>
         </div>
       <//>
     </div>
@@ -478,25 +494,25 @@ function Dashboard({ t, detail, onGo, lang='en' }) {
         <div style=${{marginTop:16,display:'flex',flexDirection:'column',gap:16}}>
           ${subs.map((s,i)=>html`
             <div key=${i} style=${{display:'flex',alignItems:'center',gap:12}}>
-              <span style=${{flex:'none',width:84,fontSize:12.5,fontWeight:600,color:'#334155'}}>${s.label}</span>
-              <div style=${{flex:1,height:8,borderRadius:999,background:'rgba(15,23,42,.07)',overflow:'hidden'}}>
+              <span style=${{flex:'none',width:84,fontSize:12.5,fontWeight:600,color:'#4A4034'}}>${s.label}</span>
+              <div style=${{flex:1,height:8,borderRadius:999,background:'rgba(90,60,30,.07)',overflow:'hidden'}}>
                 <div style=${{height:'100%',width:s.pct,borderRadius:999,background:s.color,transformOrigin:'left',animation:'sthirFill .6s ease both'}}></div>
               </div>
               <span style=${{flex:'none',width:26,textAlign:'right',fontSize:12.5,fontWeight:700,fontVariantNumeric:'tabular-nums',color:s.color}}>${s.val}</span>
             </div>`)}
         </div>
       <//>
-      <button onClick=${()=>onGo('alerts')} style=${{display:'flex',alignItems:'center',gap:12,width:'100%',textAlign:'left',cursor:'pointer',padding:18,borderRadius:12,border:'1px solid #FECACA',background:'#FEF2F2',color:'#0F172A'}}>
-        <span style=${{flex:'none',width:38,height:38,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(220,38,38,.12)',border:'1px solid rgba(220,38,38,.35)',fontSize:17}}>⚠</span>
+      <button onClick=${()=>onGo('alerts')} style=${{display:'flex',alignItems:'center',gap:12,width:'100%',textAlign:'left',cursor:'pointer',padding:18,borderRadius:12,border:'1px solid #EAC9B8',background:'#FBEDE6',color:'#241E17'}}>
+        <span style=${{flex:'none',width:38,height:38,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(178,58,44,.12)',border:'1px solid rgba(178,58,44,.35)',fontSize:17}}>⚠</span>
         <span style=${{flex:1}}>
           <span style=${{display:'block',fontSize:14,fontWeight:700}}>${t.openAlerts}</span>
-          <span style=${{display:'block',marginTop:2,fontSize:11.5,color:'#475569'}}>${(detail.alerts||[]).length} · ${t.viewAll}</span>
+          <span style=${{display:'block',marginTop:2,fontSize:11.5,color:'#6A5D4E'}}>${(detail.alerts||[]).length} · ${t.viewAll}</span>
         </span>
-        <span style=${{flex:'none',color:'#64748B',fontSize:18}}>›</span>
+        <span style=${{flex:'none',color:'#8B7E6E',fontSize:18}}>›</span>
       </button>
       <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-        <button onClick=${()=>onGo('submit')} style=${{cursor:'pointer',padding:16,borderRadius:12,border:'1px solid rgba(62,146,204,.32)',background:'#F0FDFA',color:'#3E92CC',font:'700 13px/1.3 inherit',textAlign:'left'}}>${t.nav.submit}</button>
-        <button onClick=${()=>onGo('savings')} style=${{cursor:'pointer',padding:16,borderRadius:12,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px/1.3 inherit',textAlign:'left'}}>
+        <button onClick=${()=>onGo('submit')} style=${{cursor:'pointer',padding:16,borderRadius:12,border:'1px solid rgba(46,90,135,.32)',background:'#F0FDFA',color:'#2E5A87',font:'700 13px/1.3 inherit',textAlign:'left'}}>${t.nav.submit}</button>
+        <button onClick=${()=>onGo('savings')} style=${{cursor:'pointer',padding:16,borderRadius:12,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px/1.3 inherit',textAlign:'left'}}>
           ${t.nav.savings}
           <span style=${{display:'block',marginTop:4,fontWeight:800,fontSize:15,fontVariantNumeric:'tabular-nums',color:'#15803d'}}>${fmt(detail.savings_balance)}</span>
         </button>
@@ -512,7 +528,7 @@ function Dashboard({ t, detail, onGo, lang='en' }) {
 }
 
 function Alerts({ t, alerts, lang='en' }) {
-  if (!alerts) return html`<${Spinner} color="#DC2626" title="Loading…" sub=""/>`;
+  if (!alerts) return html`<${Spinner} color="#B23A2C" title="Loading…" sub=""/>`;
   if (!alerts.length) return html`<div style=${{padding:32,borderRadius:12,border:'1px solid rgba(21,128,61,.25)',background:'rgba(21,128,61,.07)',textAlign:'center',fontSize:13.5,color:'#15803d',maxWidth:480}}>${t.noAlerts}</div>`;
   return html`
   <div style=${{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(380px,1fr))',gap:16,alignItems:'start'}}>
@@ -520,20 +536,20 @@ function Alerts({ t, alerts, lang='en' }) {
       const s = SEV[a.severity]||SEV.warning;
       const ladder = (a.intervention&&a.intervention.ladder)||[];
       return html`
-      <div key=${i} style=${{padding:20,borderRadius:12,border:'1px solid '+s.ring,background:'#FFF'}}>
+      <div key=${i} style=${{padding:20,borderRadius:12,border:'1px solid '+s.ring,background:'#FFFDF8'}}>
         <div style=${{display:'flex',alignItems:'center',gap:8}}>
           <span style=${{padding:'4px 9px',borderRadius:999,background:s.tint,border:'1px solid '+s.ring,fontSize:9.5,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:s.color}}>${(ux(lang).sev&&ux(lang).sev[a.severity])||a.severity}</span>
-          <span style=${{fontFamily:'ui-monospace,monospace',fontSize:10,color:'#64748B'}}>${a.code}</span>
+          <span style=${{fontFamily:'ui-monospace,monospace',fontSize:10,color:'#8B7E6E'}}>${a.code}</span>
         </div>
         <div style=${{marginTop:11,fontSize:17,fontWeight:800,letterSpacing:'-.02em',lineHeight:1.25,color:s.color}}>${TX(a.title,lang)}</div>
-        <div style=${{marginTop:7,fontSize:12.5,lineHeight:1.55,color:'#334155'}}>${TX(a.detail,lang)}</div>
-        <div style=${{marginTop:15,paddingTop:14,borderTop:'1px solid #E5E7EB'}}>
+        <div style=${{marginTop:7,fontSize:12.5,lineHeight:1.55,color:'#4A4034'}}>${TX(a.detail,lang)}</div>
+        <div style=${{marginTop:15,paddingTop:14,borderTop:'1px solid #E5DAC7'}}>
           <${Eyebrow}>${t.ladderLabel}<//>
           <div style=${{marginTop:11,display:'flex',flexDirection:'column',gap:9}}>
             ${ladder.map((st,j)=>html`
-              <div key=${j} style=${{display:'flex',gap:10,alignItems:'flex-start',padding:'11px 12px',borderRadius:8,background:'#F8FAFA',border:'1px solid rgba(15,23,42,.07)'}}>
-                <span style=${{flex:'none',width:20,height:20,borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(62,146,204,.12)',border:'1px solid rgba(62,146,204,.3)',fontSize:10.5,fontWeight:800,color:'#3E92CC'}}>${j+1}</span>
-                <span style=${{flex:1,fontSize:12.5,lineHeight:1.5,color:'#1E293B'}}><strong>${TX(st.label,lang)}</strong>${st.detail?html`<span style=${{display:'block',color:'#475569',marginTop:2}}>${TX(st.detail,lang)}</span>`:null}</span>
+              <div key=${j} style=${{display:'flex',gap:10,alignItems:'flex-start',padding:'11px 12px',borderRadius:8,background:'#F8FAFA',border:'1px solid rgba(90,60,30,.07)'}}>
+                <span style=${{flex:'none',width:20,height:20,borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(46,90,135,.12)',border:'1px solid rgba(46,90,135,.3)',fontSize:10.5,fontWeight:800,color:'#2E5A87'}}>${j+1}</span>
+                <span style=${{flex:1,fontSize:12.5,lineHeight:1.5,color:'#2E271E'}}><strong>${TX(st.label,lang)}</strong>${st.detail?html`<span style=${{display:'block',color:'#6A5D4E',marginTop:2}}>${TX(st.detail,lang)}</span>`:null}</span>
               </div>`)}
           </div>
         </div>
@@ -543,15 +559,15 @@ function Alerts({ t, alerts, lang='en' }) {
 }
 
 function Income({ income, lang='en' }) {
-  if (!income) return html`<${Spinner} color="#3E92CC" title="Loading…" sub=""/>`;
+  if (!income) return html`<${Spinner} color="#2E5A87" title="Loading…" sub=""/>`;
   const groups = {};
   income.forEach(e=>{ const w = weekLabel(e.received_date||e.expected_date); (groups[w]=groups[w]||[]).push(e); });
   return html`
   <div style=${{maxWidth:760}}>
-    <div style=${{display:'flex',gap:20,padding:'14px 18px',borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',marginBottom:16,fontSize:11.5,color:'#475569',flexWrap:'wrap'}}>
+    <div style=${{display:'flex',gap:20,padding:'14px 18px',borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',marginBottom:16,fontSize:11.5,color:'#6A5D4E',flexWrap:'wrap'}}>
       <span><strong style=${{color:'#15803d'}}>A</strong> — ${ux(lang).tierA}</span>
-      <span><strong style=${{color:'#3E92CC'}}>B</strong> — ${ux(lang).tierB}</span>
-      <span><strong style=${{color:'#b45309'}}>C</strong> — ${ux(lang).tierC}</span>
+      <span><strong style=${{color:'#2E5A87'}}>B</strong> — ${ux(lang).tierB}</span>
+      <span><strong style=${{color:'#A9721E'}}>C</strong> — ${ux(lang).tierC}</span>
     </div>
     <div style=${{display:'flex',flexDirection:'column',gap:18}}>
       ${Object.entries(groups).map(([wk,rows],i)=>{
@@ -559,20 +575,22 @@ function Income({ income, lang='en' }) {
         return html`
         <div key=${i}>
           <div style=${{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 4px 8px'}}>
-            <span style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#64748B'}}>${wk}</span>
+            <span style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#8B7E6E'}}>${wk}</span>
             <span style=${{fontSize:13.5,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(total)}</span>
           </div>
           <div style=${{display:'flex',flexDirection:'column',gap:8}}>
             ${rows.map((e,j)=>{ const tr=tierOf(e.tier); const overdue=e.status==='overdue'; return html`
-              <div key=${j} style=${{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF'}}>
+              <div key=${j} style=${{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8'}}>
                 <span style=${{flex:'none',width:34,height:34,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:tr.tint,border:'1px solid '+tr.ring,fontSize:14,fontWeight:800,color:tr.color}}>${e.tier}</span>
                 <span style=${{flex:1,minWidth:0}}>
-                  <span style=${{display:'block',fontSize:13.5,fontWeight:700}}>${e.source_name||e.reference}</span>
-                  <span style=${{display:'block',marginTop:2,fontSize:11,color:'#475569'}}>${e.received_date||e.expected_date} · ${ux(lang).kinds[e.kind]||e.kind.replace(/_/g,' ')}</span>
+                  <span style=${{display:'flex',alignItems:'center',gap:7,fontSize:13.5,fontWeight:700}}>${e.source_name||e.reference}
+                    ${e.tier==='A'?html`<span style=${{flex:'none',fontFamily:"'Fraunces',serif",fontSize:8,fontWeight:700,letterSpacing:'.14em',color:'#3E7C4F',border:'1.5px solid #3E7C4F',borderRadius:3,padding:'1px 4px',transform:'rotate(-5deg)',opacity:.8,textTransform:'uppercase'}}>Verified</span>`:null}
+                  </span>
+                  <span style=${{display:'block',marginTop:2,fontSize:11,color:'#6A5D4E'}}>${e.received_date||e.expected_date} · ${ux(lang).kinds[e.kind]||e.kind.replace(/_/g,' ')}</span>
                 </span>
                 <span style=${{flex:'none',textAlign:'right'}}>
                   <span style=${{display:'block',fontSize:14.5,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(e.gross)}</span>
-                  ${overdue?html`<span style=${{display:'block',marginTop:2,fontSize:9.5,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#b45309'}}>${ux(lang).overdue}</span>`:null}
+                  ${overdue?html`<span style=${{display:'block',marginTop:2,fontSize:9.5,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:'#A9721E'}}>${ux(lang).overdue}</span>`:null}
                 </span>
               </div>`;})}
           </div>
@@ -612,13 +630,13 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
       const r = await fetch(API + `/workers/${workerId}/submit-income`, { method:'POST', body:fd });
       if(!r.ok) throw new Error('upload ' + r.status);
       const data = await r.json();
-      if(data.rejected){ setUpErr(data.reason_code==='amount_mismatch' ? U.mismatch(data.claimed, data.document_amount) : (data.reason_code==='not_income' ? U.notIncome : (data.reason||U.upFail))); setPhase('pick'); return; }
+      if(data.rejected){ setUpErr(data.reason_code==='amount_mismatch' ? U.mismatch(data.claimed, data.document_amount) : (data.reason_code==='duplicate_proof' ? U.duplicate : (data.reason_code==='not_income' ? U.notIncome : (data.reason||U.upFail)))); setPhase('pick'); return; }
       setResult({ ...data, sample:{ reference: data.reference || ref || file.name, gross: amt, kind, source_name: ref || file.name } });
       setFile(null); setGross(''); setRef('');
       setPhase('result');
     } catch(e){ setUpErr(U.upFail); setPhase('pick'); }
   };
-  if (phase==='verifying') return html`<div style=${{maxWidth:680}}><${Spinner} color="#3E92CC" title=${U.verifying} sub=${U.verifyingSub}/></div>`;
+  if (phase==='verifying') return html`<div style=${{maxWidth:680}}><${Spinner} color="#2E5A87" title=${U.verifying} sub=${U.verifyingSub}/></div>`;
   if (phase==='result' && result && result.verification) {
     const v = result.verification, tr = tierOf(v.tier);
     const after = result.resilience.resilience_score;
@@ -629,28 +647,28 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
         <div style=${{display:'flex',alignItems:'center',gap:14}}>
           <div style=${{flex:'none',width:56,height:56,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:tr.tint,border:'1px solid '+tr.ring,fontSize:26,fontWeight:800,color:tr.color}}>${v.tier}</div>
           <div style=${{flex:1}}>
-            <${Eyebrow} color="#475569">${U.verifiedTier} ${v.tier} · ${result.backend}<//>
+            <${Eyebrow} color="#6A5D4E">${U.verifiedTier} ${v.tier} · ${result.backend}<//>
             <div style=${{marginTop:4,fontSize:14.5,fontWeight:700,color:tr.color}}>${result.sample.source_name||result.sample.reference}</div>
-            <div style=${{marginTop:3,fontSize:12,color:'#475569'}}>${fmt(result.sample.gross)}</div>
+            <div style=${{marginTop:3,fontSize:12,color:'#6A5D4E'}}>${fmt(result.sample.gross)}</div>
           </div>
         </div>
         <div style=${{marginTop:15,display:'flex',flexDirection:'column',gap:8}}>
-          ${(v.signals||[]).map((c,i)=>html`<div key=${i} style=${{display:'flex',gap:9,alignItems:'flex-start',fontSize:12.5,lineHeight:1.45,color:'#334155'}}><span style=${{flex:'none',color:'#15803d',fontWeight:800}}>✓</span><span>${TX(c,lang)}</span></div>`)}
+          ${(v.signals||[]).map((c,i)=>html`<div key=${i} style=${{display:'flex',gap:9,alignItems:'flex-start',fontSize:12.5,lineHeight:1.45,color:'#4A4034'}}><span style=${{flex:'none',color:'#15803d',fontWeight:800}}>✓</span><span>${TX(c,lang)}</span></div>`)}
         </div>
       <//>
       <${Card}>
-        <${Eyebrow} color="#475569">${U.resilienceRefreshed}<//>
+        <${Eyebrow} color="#6A5D4E">${U.resilienceRefreshed}<//>
         <div style=${{marginTop:14,display:'flex',alignItems:'center',gap:16}}>
-          <div style=${{textAlign:'center'}}><div style=${{fontSize:26,fontWeight:800,color:'#64748B',fontVariantNumeric:'tabular-nums'}}>${before??'—'}</div><div style=${{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:'#64748B'}}>${U.before}</div></div>
-          <div style=${{flex:1,height:10,borderRadius:999,background:'rgba(15,23,42,.07)',position:'relative',overflow:'hidden'}}>
+          <div style=${{textAlign:'center'}}><div style=${{fontSize:26,fontWeight:800,color:'#8B7E6E',fontVariantNumeric:'tabular-nums'}}>${before??'—'}</div><div style=${{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:'#8B7E6E'}}>${U.before}</div></div>
+          <div style=${{flex:1,height:10,borderRadius:999,background:'rgba(90,60,30,.07)',position:'relative',overflow:'hidden'}}>
             <div style=${{position:'absolute',inset:0,width:after+'%',background:'#16A34A',transformOrigin:'left',animation:'sthirFill .8s ease both'}}></div>
           </div>
           <div style=${{textAlign:'center'}}><div style=${{fontSize:30,fontWeight:800,color:'#15803d',fontVariantNumeric:'tabular-nums'}}>${after}</div><div style=${{fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:'#15803d'}}>${delta>=0?'+':''}${delta}</div></div>
         </div>
       <//>
       <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-        <button onClick=${()=>{setPhase('pick');setResult(null);reload&&reload();}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px inherit'}}>${U.submitAnother}</button>
-        <button onClick=${()=>onAdvance(result.income_event_id)} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(62,146,204,.4)',background:'#3E92CC',color:'#FFF',font:'800 13px inherit'}}>${U.requestAdvance}</button>
+        <button onClick=${()=>{setPhase('pick');setResult(null);reload&&reload();}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.submitAnother}</button>
+        <button onClick=${()=>onAdvance(result.income_event_id)} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(46,90,135,.4)',background:'#2E5A87',color:'#FFFDF8',font:'800 13px inherit'}}>${U.requestAdvance}</button>
       </div>
     </div>`;
   }
@@ -660,37 +678,37 @@ function Submit({ workerId, samples, detail, onAdvance, reload, lang='en' }) {
   <div style=${{maxWidth:680}}>
     <div style=${{display:'flex',flexDirection:'column',gap:10}}>
       ${mine.length ? mine.map((s,i)=>html`
-        <button key=${i} onClick=${()=>pick(s)} style=${{display:'flex',alignItems:'center',gap:14,width:'100%',textAlign:'left',cursor:'pointer',padding:14,borderRadius:12,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A'}}>
-          <span style=${{flex:'none',width:54,height:54,borderRadius:8,border:'1px solid #E5E7EB',background:'repeating-linear-gradient(135deg,rgba(15,23,42,.07) 0 6px,rgba(15,23,42,.02) 6px 12px)',display:'flex',alignItems:'center',justifyContent:'center',font:'600 7px/1.2 ui-monospace,monospace',color:'#475569',textAlign:'center',padding:4}}>${U.kinds[s.kind]||s.kind.replace(/_/g,' ')}</span>
+        <button key=${i} onClick=${()=>pick(s)} style=${{display:'flex',alignItems:'center',gap:14,width:'100%',textAlign:'left',cursor:'pointer',padding:14,borderRadius:12,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17'}}>
+          <span style=${{flex:'none',width:54,height:54,borderRadius:8,border:'1px solid #E5DAC7',background:'repeating-linear-gradient(135deg,rgba(90,60,30,.07) 0 6px,rgba(90,60,30,.02) 6px 12px)',display:'flex',alignItems:'center',justifyContent:'center',font:'600 7px/1.2 ui-monospace,monospace',color:'#6A5D4E',textAlign:'center',padding:4}}>${U.kinds[s.kind]||s.kind.replace(/_/g,' ')}</span>
           <span style=${{flex:1,minWidth:0}}>
             <span style=${{display:'block',fontSize:14,fontWeight:700}}>${s.reference}</span>
-            <span style=${{display:'block',marginTop:3,fontSize:11.5,color:'#475569'}}>${U.kinds[s.kind]||s.kind.replace(/_/g,' ')}</span>
+            <span style=${{display:'block',marginTop:3,fontSize:11.5,color:'#6A5D4E'}}>${U.kinds[s.kind]||s.kind.replace(/_/g,' ')}</span>
           </span>
           <span style=${{flex:'none',fontSize:14.5,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(s.gross)}</span>
-        </button>`) : html`<div style=${{padding:20,fontSize:13,color:'#64748B'}}>${U.noPending}</div>`}
+        </button>`) : html`<div style=${{padding:20,fontSize:13,color:'#8B7E6E'}}>${U.noPending}</div>`}
       <input ref=${fileRef} type="file" accept="image/*,application/pdf" onChange=${onFile} style=${{display:'none'}}/>
-      <div onClick=${()=>fileRef.current&&fileRef.current.click()} style=${{marginTop:4,padding:22,borderRadius:12,border:'1px dashed rgba(62,146,204,.4)',background:'rgba(62,146,204,.05)',textAlign:'center',cursor:'pointer'}}>
-        <div style=${{fontSize:13.5,fontWeight:700,color:'#3E92CC'}}>${file?U.upSel:U.upTitle}</div>
-        <div style=${{marginTop:4,fontSize:11,color:'#64748B'}}>${file?file.name:U.upHint}</div>
+      <div onClick=${()=>fileRef.current&&fileRef.current.click()} style=${{marginTop:4,padding:22,borderRadius:12,border:'1px dashed rgba(46,90,135,.4)',background:'rgba(46,90,135,.05)',textAlign:'center',cursor:'pointer'}}>
+        <div style=${{fontSize:13.5,fontWeight:700,color:'#2E5A87'}}>${file?U.upSel:U.upTitle}</div>
+        <div style=${{marginTop:4,fontSize:11,color:'#8B7E6E'}}>${file?file.name:U.upHint}</div>
       </div>
       ${file?html`
-      <div style=${{padding:18,borderRadius:12,border:'1px solid #EEF2F6',background:'#FFFFFF',boxShadow:'0 1px 2px rgba(15,23,42,.04)',display:'flex',flexDirection:'column',gap:12}}>
+      <div style=${{padding:18,borderRadius:12,border:'1px solid #EBE3D3',background:'#FFFDF8',boxShadow:'0 1px 2px rgba(90,60,30,.04)',display:'flex',flexDirection:'column',gap:12}}>
         <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#475569',marginBottom:5}}>${U.amount}</span>
+          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.amount}</span>
             <input value=${gross} onInput=${e=>setGross(e.target.value)} type="number" inputMode="decimal" placeholder="e.g. 1800"
-              style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E2E8F0',background:'#F8FAFC',font:'500 14px inherit',outline:'none'}}/></label>
-          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#475569',marginBottom:5}}>${U.type}</span>
-            <select value=${kind} onChange=${e=>setKind(e.target.value)} style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E2E8F0',background:'#F8FAFC',font:'500 14px inherit',outline:'none'}}>
+              style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}/></label>
+          <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.type}</span>
+            <select value=${kind} onChange=${e=>setKind(e.target.value)} style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}>
               <option value="gig_payout">${U.kinds.gig_payout}</option><option value="invoice">${U.kinds.invoice}</option><option value="cash_gig">${U.kinds.cash_gig}</option><option value="salary">${U.kinds.salary}</option>
             </select></label>
         </div>
-        <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#475569',marginBottom:5}}>${U.refOpt}</span>
+        <label><span style=${{display:'block',fontSize:11,fontWeight:700,color:'#6A5D4E',marginBottom:5}}>${U.refOpt}</span>
           <input value=${ref} onInput=${e=>setRef(e.target.value)} type="text" placeholder="Invoice no. / payout ref"
-            style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E2E8F0',background:'#F8FAFC',font:'500 14px inherit',outline:'none'}}/></label>
-        ${upErr?html`<div style=${{fontSize:12.5,color:'#DC2626',fontWeight:600}}>${upErr}</div>`:null}
+            style=${{width:'100%',boxSizing:'border-box',padding:'10px 12px',borderRadius:10,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',outline:'none'}}/></label>
+        ${upErr?html`<div style=${{fontSize:12.5,color:'#B23A2C',fontWeight:600}}>${upErr}</div>`:null}
         <div style=${{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10}}>
-          <button onClick=${()=>{setFile(null);setUpErr('');}} style=${{cursor:'pointer',padding:12,borderRadius:10,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px inherit'}}>${U.cancel}</button>
-          <button onClick=${upload} style=${{cursor:'pointer',padding:12,borderRadius:10,border:0,background:'#1F2A44',color:'#FFF',font:'800 13px inherit'}}>${U.verifySubmit}</button>
+          <button onClick=${()=>{setFile(null);setUpErr('');}} style=${{cursor:'pointer',padding:12,borderRadius:10,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.cancel}</button>
+          <button onClick=${upload} style=${{cursor:'pointer',padding:12,borderRadius:10,border:0,background:'#233150',color:'#FFFDF8',font:'800 13px inherit'}}>${U.verifySubmit}</button>
         </div>
       </div>`:null}
     </div>
@@ -708,75 +726,75 @@ function Advance({ incomeId, workerId, samples, reload, lang='en' }) {
     try { await api(`/income/${eid}/verify`,{method:'POST'}).catch(()=>{}); const r = await api(`/income/${eid}/advance`,{method:'POST'}); setRes(r); setPhase('done'); reload&&reload(); }
     catch(e){ setPhase('ask'); }
   };
-  if (!eid) return html`<div style=${{maxWidth:680,fontSize:13,color:'#64748B'}}>${U.needProof}</div>`;
-  if (phase==='deciding') return html`<div style=${{maxWidth:680}}><${Spinner} color="#3E92CC" title=${U.asking} sub=${U.askingSub}/></div>`;
+  if (!eid) return html`<div style=${{maxWidth:680,fontSize:13,color:'#8B7E6E'}}>${U.needProof}</div>`;
+  if (phase==='deciding') return html`<div style=${{maxWidth:680}}><${Spinner} color="#2E5A87" title=${U.asking} sub=${U.askingSub}/></div>`;
   if (phase==='done' && res) {
     const d = res.decision;
     if (d.decision==='approved') {
       const alloc = res.allocation||[]; const mx = Math.max(1,...alloc.map(a=>a.amount));
-      const colorFor = c => c==='savings'?'#15803d':c==='spendable'?'#3E92CC':c==='rent'?'#334155':'#b45309';
+      const colorFor = c => c==='savings'?'#15803d':c==='spendable'?'#2E5A87':c==='rent'?'#4A4034':'#A9721E';
       return html`
       <div style=${{maxWidth:680,display:'flex',flexDirection:'column',gap:16,animation:'sthirRise .35s ease both'}}>
         <div style=${{padding:22,borderRadius:12,border:'1px solid rgba(21,128,61,.3)',background:'#F0FDF4'}}>
           <${Eyebrow} color="#15803d">${U.approved} · ${(d.apr_equiv*100).toFixed(1)}% ${U.aprEquiv}<//>
           <div style=${{marginTop:8,fontSize:36,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(d.advance_amount)}</div>
-          <div style=${{marginTop:6,fontSize:12.5,lineHeight:1.5,color:'#334155'}}>${U.splitNote} ${fmt(d.net_disbursed)}.</div>
+          <div style=${{marginTop:6,fontSize:12.5,lineHeight:1.5,color:'#4A4034'}}>${U.splitNote} ${fmt(d.net_disbursed)}.</div>
         </div>
         <${Card}>
-          <${Eyebrow} color="#475569">${U.allocation}<//>
+          <${Eyebrow} color="#6A5D4E">${U.allocation}<//>
           <div style=${{marginTop:14,display:'flex',flexDirection:'column',gap:11}}>
             ${alloc.map((a,i)=>html`
               <div key=${i}>
                 <div style=${{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:10}}>
-                  <span style=${{fontSize:12.5,fontWeight:600,color:'#334155'}}>${TX(a.label,lang)} <span style=${{color:'#94A3B8',fontWeight:500}}>· ${TX(a.payee,lang)}</span></span>
+                  <span style=${{fontSize:12.5,fontWeight:600,color:'#4A4034'}}>${TX(a.label,lang)} <span style=${{color:'#B0A290',fontWeight:500}}>· ${TX(a.payee,lang)}</span></span>
                   <span style=${{fontSize:13.5,fontWeight:800,fontVariantNumeric:'tabular-nums',color:colorFor(a.category)}}>${fmt(a.amount)}</span>
                 </div>
-                <div style=${{marginTop:6,height:9,borderRadius:999,background:'rgba(15,23,42,.06)',overflow:'hidden'}}>
+                <div style=${{marginTop:6,height:9,borderRadius:999,background:'rgba(90,60,30,.06)',overflow:'hidden'}}>
                   <div style=${{height:'100%',width:(a.amount/mx*100)+'%',borderRadius:999,background:colorFor(a.category),transformOrigin:'left',animation:'sthirFill .7s ease both'}}></div>
                 </div>
               </div>`)}
           </div>
-          <div style=${{marginTop:16,padding:13,borderRadius:8,background:'rgba(62,146,204,.06)',border:'1px solid rgba(62,146,204,.18)'}}>
-            <${Eyebrow} color="#475569">${U.vpa}<//>
-            <div style=${{marginTop:5,font:'700 14px/1.2 ui-monospace,monospace',color:'#3E92CC'}}>${res.virtual_account}</div>
+          <div style=${{marginTop:16,padding:13,borderRadius:8,background:'rgba(46,90,135,.06)',border:'1px solid rgba(46,90,135,.18)'}}>
+            <${Eyebrow} color="#6A5D4E">${U.vpa}<//>
+            <div style=${{marginTop:5,font:'700 14px/1.2 ui-monospace,monospace',color:'#2E5A87'}}>${res.virtual_account}</div>
           </div>
         <//>
-        <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px inherit'}}>${U.askAgain}</button>
+        <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.askAgain}</button>
       </div>`;
     }
     if (d.decision==='refused') {
       return html`
       <div style=${{maxWidth:680,display:'flex',flexDirection:'column',gap:16,animation:'sthirRise .35s ease both'}}>
-        <div style=${{padding:22,borderRadius:12,border:'1px solid rgba(220,38,38,.3)',background:'#FEF2F2'}}>
+        <div style=${{padding:22,borderRadius:12,border:'1px solid rgba(178,58,44,.3)',background:'#FBEDE6'}}>
           <div style=${{display:'flex',alignItems:'center',gap:10}}>
-            <span style=${{width:36,height:36,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(220,38,38,.12)',border:'1px solid rgba(220,38,38,.35)',fontSize:17}}>🛡</span>
-            <${Eyebrow} color="#DC2626">${U.heldBack}<//>
+            <span style=${{width:36,height:36,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(178,58,44,.12)',border:'1px solid rgba(178,58,44,.35)',fontSize:17}}>🛡</span>
+            <${Eyebrow} color="#B23A2C">${U.heldBack}<//>
           </div>
           <div style=${{marginTop:14,fontSize:19,fontWeight:800,lineHeight:1.3}}>${U.deepen}</div>
-          <div style=${{marginTop:9,fontSize:13,lineHeight:1.6,color:'#334155'}}>${TX(d.refuse_reason,lang)}</div>
+          <div style=${{marginTop:9,fontSize:13,lineHeight:1.6,color:'#4A4034'}}>${TX(d.refuse_reason,lang)}</div>
         </div>
         <div style=${{padding:20,borderRadius:12,border:'1px solid rgba(21,128,61,.28)',background:'#F0FDF4'}}>
-          <${Eyebrow} color="#475569">${U.betterOption}<//>
+          <${Eyebrow} color="#6A5D4E">${U.betterOption}<//>
           <div style=${{marginTop:9,fontSize:16,fontWeight:800,color:'#15803d'}}>${TX(d.alternative_label,lang)}</div>
-          <button style=${{marginTop:15,width:'100%',cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(21,128,61,.4)',background:'#16A34A',color:'#FFF',font:'800 14px inherit'}}>${U.startRefi}</button>
+          <button style=${{marginTop:15,width:'100%',cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(21,128,61,.4)',background:'#16A34A',color:'#FFFDF8',font:'800 14px inherit'}}>${U.startRefi}</button>
         </div>
-        <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px inherit'}}>${U.back}</button>
+        <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.back}</button>
       </div>`;
     }
     // clarify / other
-    return html`<div style=${{maxWidth:680,padding:22,borderRadius:12,border:'1px solid rgba(217,119,6,.32)',background:'#FFFBEB'}}>
-      <${Eyebrow} color="#b45309">${U.oneQ}<//>
+    return html`<div style=${{maxWidth:680,padding:22,borderRadius:12,border:'1px solid rgba(169,114,30,.32)',background:'#FFFBEB'}}>
+      <${Eyebrow} color="#A9721E">${U.oneQ}<//>
       <div style=${{marginTop:12,fontSize:17,fontWeight:800}}>${d.question?TX(d.question,lang):(d.refuse_reason?TX(d.refuse_reason,lang):U.needsClarify)}</div>
-      <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{marginTop:16,cursor:'pointer',padding:'12px 18px',borderRadius:8,border:'1px solid #D1D5DB',background:'#FFF',font:'700 13px inherit'}}>${U.back}</button>
+      <button onClick=${()=>{setPhase('ask');setRes(null);}} style=${{marginTop:16,cursor:'pointer',padding:'12px 18px',borderRadius:8,border:'1px solid #D8CCB8',background:'#FFFDF8',font:'700 13px inherit'}}>${U.back}</button>
     </div>`;
   }
   // ask
   return html`
   <div style=${{maxWidth:680}}>
     <${Card} style=${{padding:24}}>
-      <div style=${{textAlign:'center',fontSize:16,color:'#475569'}}>${U.askIntro}</div>
+      <div style=${{textAlign:'center',fontSize:16,color:'#6A5D4E'}}>${U.askIntro}</div>
     <//>
-    <button onClick=${decide} style=${{marginTop:14,width:'100%',cursor:'pointer',padding:17,borderRadius:12,border:'1px solid rgba(62,146,204,.4)',background:'#3E92CC',color:'#FFF',font:'800 15px inherit'}}>${U.askSthir}</button>
+    <button onClick=${decide} style=${{marginTop:14,width:'100%',cursor:'pointer',padding:17,borderRadius:12,border:'1px solid rgba(46,90,135,.4)',background:'#2E5A87',color:'#FFFDF8',font:'800 15px inherit'}}>${U.askSthir}</button>
   </div>`;
 }
 
@@ -788,20 +806,20 @@ function Savings({ savings, detail, lang='en' }) {
   return html`
   <div style=${{display:'grid',gridTemplateColumns:'.9fr 1.1fr',gap:16,alignItems:'start',maxWidth:980}}>
     <div style=${{padding:24,borderRadius:12,border:'1px solid rgba(21,128,61,.3)',background:'#F0FDF4'}}>
-      <${Eyebrow} color="#475569">${U.savBalance}<//>
+      <${Eyebrow} color="#6A5D4E">${U.savBalance}<//>
       <div style=${{marginTop:8,fontSize:40,fontWeight:800,letterSpacing:'-.035em',lineHeight:1,fontVariantNumeric:'tabular-nums'}}>${fmt(bal)}</div>
-      <div style=${{marginTop:16,height:10,borderRadius:999,background:'rgba(15,23,42,.08)',overflow:'hidden'}}><div style=${{height:'100%',width:pct+'%',borderRadius:999,background:'#16A34A'}}></div></div>
-      <div style=${{marginTop:9,fontSize:12,color:'#475569'}}>${pct.toFixed(0)}% ${U.cushionA} ${fmt(target)} ${U.cushionB} ${Math.round((savings.autosave_rate||0)*100)}%</div>
+      <div style=${{marginTop:16,height:10,borderRadius:999,background:'rgba(90,60,30,.08)',overflow:'hidden'}}><div style=${{height:'100%',width:pct+'%',borderRadius:999,background:'#16A34A'}}></div></div>
+      <div style=${{marginTop:9,fontSize:12,color:'#6A5D4E'}}>${pct.toFixed(0)}% ${U.cushionA} ${fmt(target)} ${U.cushionB} ${Math.round((savings.autosave_rate||0)*100)}%</div>
     </div>
     <div>
-      <div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:'#64748B',padding:'0 4px 10px'}}>${U.ledgerLabel}</div>
+      <div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:'#8B7E6E',padding:'0 4px 10px'}}>${U.ledgerLabel}</div>
       <div style=${{display:'flex',flexDirection:'column',gap:8}}>
-        ${tx.length?tx.map((r,i)=>{ const inc=(r.amount||r.delta||0)>=0; const amt=r.amount!=null?r.amount:r.delta; const col=inc?'#15803d':'#DC2626'; return html`
-          <div key=${i} style=${{display:'flex',alignItems:'center',gap:12,padding:'13px 16px',borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF'}}>
-            <span style=${{flex:'none',width:30,height:30,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:inc?'rgba(21,128,61,.1)':'rgba(220,38,38,.1)',fontSize:13,fontWeight:800,color:col}}>${inc?'↑':'↓'}</span>
-            <span style=${{flex:1,minWidth:0}}><span style=${{display:'block',fontSize:13,fontWeight:600}}>${r.label||r.kind||'Sweep'}</span><span style=${{display:'block',marginTop:2,fontSize:10.5,color:'#64748B'}}>${r.date||r.ts||''}</span></span>
+        ${tx.length?tx.map((r,i)=>{ const inc=(r.amount||r.delta||0)>=0; const amt=r.amount!=null?r.amount:r.delta; const col=inc?'#15803d':'#B23A2C'; return html`
+          <div key=${i} style=${{display:'flex',alignItems:'center',gap:12,padding:'13px 16px',borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8'}}>
+            <span style=${{flex:'none',width:30,height:30,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:inc?'rgba(21,128,61,.1)':'rgba(178,58,44,.1)',fontSize:13,fontWeight:800,color:col}}>${inc?'↑':'↓'}</span>
+            <span style=${{flex:1,minWidth:0}}><span style=${{display:'block',fontSize:13,fontWeight:600}}>${r.label||r.kind||'Sweep'}</span><span style=${{display:'block',marginTop:2,fontSize:10.5,color:'#8B7E6E'}}>${r.date||r.ts||''}</span></span>
             <span style=${{flex:'none',fontSize:13.5,fontWeight:800,fontVariantNumeric:'tabular-nums',color:col}}>${inc?'+':''}${fmt(amt)}</span>
-          </div>`;}) : html`<div style=${{padding:20,fontSize:13,color:'#64748B',border:'1px solid #E5E7EB',borderRadius:8,background:'#FFF'}}>${U.noSweeps}</div>`}
+          </div>`;}) : html`<div style=${{padding:20,fontSize:13,color:'#8B7E6E',border:'1px solid #E5DAC7',borderRadius:8,background:'#FFFDF8'}}>${U.noSweeps}</div>`}
       </div>
     </div>
   </div>`;
@@ -820,25 +838,25 @@ function Entitle({ workerId, offset, lang='en' }) {
         <${Eyebrow} color="#15803d">${U.welfareApplied}<//>
         <div style=${{marginTop:9,display:'flex',alignItems:'baseline',gap:10,flexWrap:'wrap'}}>
           <span style=${{fontSize:24,fontWeight:800,fontVariantNumeric:'tabular-nums',color:'#15803d'}}>${fmt(data.welfare_offset)}</span>
-          <span style=${{fontSize:13,color:'#334155'}}>${U.coveredFree}</span><span style=${{fontSize:15,color:'#64748B'}}>→</span>
+          <span style=${{fontSize:13,color:'#4A4034'}}>${U.coveredFree}</span><span style=${{fontSize:15,color:'#8B7E6E'}}>→</span>
           <span style=${{fontSize:24,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(data.residual_loan_needed)}</span>
-          <span style=${{fontSize:13,color:'#334155'}}>${U.loan}</span>
+          <span style=${{fontSize:13,color:'#4A4034'}}>${U.loan}</span>
         </div>
       </div>` : null}
     <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
       ${(data.schemes||[]).map((s,i)=>html`
-        <div key=${i} style=${{padding:18,borderRadius:12,border:'1px solid #E5E7EB',background:'#FFF'}}>
+        <div key=${i} style=${{padding:18,borderRadius:12,border:'1px solid #E5DAC7',background:'#FFFDF8'}}>
           <div style=${{display:'flex',alignItems:'flex-start',gap:10}}>
             <div style=${{flex:1,fontSize:14,fontWeight:700,lineHeight:1.35}}>${TX(s.name,lang)}</div>
             <span style=${{flex:'none',padding:'4px 9px',borderRadius:999,background:'rgba(21,128,61,.1)',border:'1px solid rgba(21,128,61,.3)',fontSize:10,fontWeight:800,color:'#15803d'}}>${U.free}</span>
           </div>
-          <div style=${{marginTop:7,fontSize:12,lineHeight:1.5,color:'#334155'}}>${TX(s.note,lang)}</div>
-          <div style=${{marginTop:11,display:'flex',alignItems:'center',justifyContent:'space-between',paddingTop:11,borderTop:'1px solid #E5E7EB'}}>
-            <span style=${{fontSize:10.5,letterSpacing:'.08em',textTransform:'uppercase',color:'#64748B'}}>${U.maxCover}</span>
+          <div style=${{marginTop:7,fontSize:12,lineHeight:1.5,color:'#4A4034'}}>${TX(s.note,lang)}</div>
+          <div style=${{marginTop:11,display:'flex',alignItems:'center',justifyContent:'space-between',paddingTop:11,borderTop:'1px solid #E5DAC7'}}>
+            <span style=${{fontSize:10.5,letterSpacing:'.08em',textTransform:'uppercase',color:'#8B7E6E'}}>${U.maxCover}</span>
             <span style=${{fontSize:14.5,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>${fmt(s.max_cover)}</span>
           </div>
         </div>`)}
-      ${!(data.schemes||[]).length ? html`<div style=${{gridColumn:'1/-1',padding:20,fontSize:13,color:'#64748B'}}>${U.noScheme}</div>`:null}
+      ${!(data.schemes||[]).length ? html`<div style=${{gridColumn:'1/-1',padding:20,fontSize:13,color:'#8B7E6E'}}>${U.noScheme}</div>`:null}
     </div>
   </div>`;
 }
@@ -869,17 +887,17 @@ function Crisis({ workerId, onCovered, lang='en' }) {
     } catch(e){ setCErr(U.crisisFail); setPhase('pick'); }
   };
   const onCFile = (e) => { const f = e.target.files && e.target.files[0]; if(f) runUpload(f); };
-  if (phase==='assessing') return html`<div style=${{maxWidth:680}}><${Spinner} color="#DC2626" title=${U.reading} sub=${U.readingSub}/></div>`;
+  if (phase==='assessing') return html`<div style=${{maxWidth:680}}><${Spinner} color="#B23A2C" title=${U.reading} sub=${U.readingSub}/></div>`;
   if (phase==='result' && res) {
     const a = res.assessment, br = res.entitlement_bridge||{}, covered = res.decision==='covered_by_entitlement';
     const scheme = (br.schemes&&br.schemes[0]&&TX(br.schemes[0].name,lang))||U.aGovScheme;
     return html`
     <div style=${{maxWidth:680,display:'flex',flexDirection:'column',gap:16,animation:'sthirRise .35s ease both'}}>
       <${Card}>
-        <${Eyebrow} color="#475569">${U.assessment}<//>
+        <${Eyebrow} color="#6A5D4E">${U.assessment}<//>
         <div style=${{marginTop:9,fontSize:17,fontWeight:800,lineHeight:1.3}}>${U.crisisTypes[a.crisis_type]||prettyCrisis(a.crisis_type)}</div>
-        <div style=${{marginTop:6,fontSize:12.5,color:'#334155'}}>${a.vendor_name} · ${fmt(a.estimated_amount)}</div>
-        <div style=${{marginTop:14,display:'flex',gap:9,fontSize:12.5,lineHeight:1.45,color:'#334155'}}>
+        <div style=${{marginTop:6,fontSize:12.5,color:'#4A4034'}}>${a.vendor_name} · ${fmt(a.estimated_amount)}</div>
+        <div style=${{marginTop:14,display:'flex',gap:9,fontSize:12.5,lineHeight:1.45,color:'#4A4034'}}>
           <span style=${{flex:'none',color:'#15803d',fontWeight:800}}>✓</span><span>${TX(a.evidence_summary,lang)}</span>
         </div>
       <//>
@@ -888,34 +906,34 @@ function Crisis({ workerId, onCovered, lang='en' }) {
           <${Eyebrow} color="#15803d">${U.goodNews}<//>
           <div style=${{marginTop:10,fontSize:21,fontWeight:800,lineHeight:1.3}}>${U.coveredMsgA} ${scheme}${U.coveredMsgB}</div>
           <div style=${{marginTop:18,display:'flex',gap:12}}>
-            <div style=${{flex:1,padding:14,borderRadius:8,background:'rgba(21,128,61,.08)'}}><${Eyebrow} color="#475569">${U.coveredFree}<//><div style=${{marginTop:4,fontSize:20,fontWeight:800,fontVariantNumeric:'tabular-nums',color:'#15803d'}}>${fmt(a.estimated_amount)}</div></div>
-            <div style=${{flex:1,padding:14,borderRadius:8,background:'rgba(15,23,42,.05)'}}><${Eyebrow} color="#475569">${U.youBorrow}<//><div style=${{marginTop:4,fontSize:20,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>₹0</div></div>
+            <div style=${{flex:1,padding:14,borderRadius:8,background:'rgba(21,128,61,.08)'}}><${Eyebrow} color="#6A5D4E">${U.coveredFree}<//><div style=${{marginTop:4,fontSize:20,fontWeight:800,fontVariantNumeric:'tabular-nums',color:'#15803d'}}>${fmt(a.estimated_amount)}</div></div>
+            <div style=${{flex:1,padding:14,borderRadius:8,background:'rgba(90,60,30,.05)'}}><${Eyebrow} color="#6A5D4E">${U.youBorrow}<//><div style=${{marginTop:4,fontSize:20,fontWeight:800,fontVariantNumeric:'tabular-nums'}}>₹0</div></div>
           </div>
-          <button onClick=${()=>onCovered&&onCovered({tag:'crisis-'+(a.crisis_type.includes('accident')?'accident':'hospital'),amount:a.estimated_amount})} style=${{marginTop:16,width:'100%',cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(21,128,61,.4)',background:'#16A34A',color:'#FFF',font:'800 14px inherit'}}>${U.claimSteps}</button>
+          <button onClick=${()=>onCovered&&onCovered({tag:'crisis-'+(a.crisis_type.includes('accident')?'accident':'hospital'),amount:a.estimated_amount})} style=${{marginTop:16,width:'100%',cursor:'pointer',padding:15,borderRadius:8,border:'1px solid rgba(21,128,61,.4)',background:'#16A34A',color:'#FFFDF8',font:'800 14px inherit'}}>${U.claimSteps}</button>
         </div>` : html`
-        <div style=${{padding:24,borderRadius:12,border:'1px solid rgba(62,146,204,.35)',background:'#F0FDFA'}}>
-          <${Eyebrow} color="#3E92CC">${U.emgSent}<//>
+        <div style=${{padding:24,borderRadius:12,border:'1px solid rgba(46,90,135,.35)',background:'#F0FDFA'}}>
+          <${Eyebrow} color="#2E5A87">${U.emgSent}<//>
           <div style=${{marginTop:10,fontSize:21,fontWeight:800,lineHeight:1.3}}>${U.paidTo} ${fmt(res.emergency_advance.amount)} ${U.directlyTo} ${a.vendor_name} ${U.overUpi}</div>
-          <div style=${{marginTop:12,padding:13,borderRadius:8,background:'rgba(15,23,42,.05)',fontSize:12.5,lineHeight:1.55,color:'#334155'}}>${res.emergency_advance.note} ${U.repayNote}</div>
+          <div style=${{marginTop:12,padding:13,borderRadius:8,background:'rgba(90,60,30,.05)',fontSize:12.5,lineHeight:1.55,color:'#4A4034'}}>${res.emergency_advance.note} ${U.repayNote}</div>
         </div>`}
-      <button onClick=${()=>{setPhase('pick');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A',font:'700 13px inherit'}}>${U.runAnother}</button>
+      <button onClick=${()=>{setPhase('pick');setRes(null);}} style=${{cursor:'pointer',padding:15,borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17',font:'700 13px inherit'}}>${U.runAnother}</button>
     </div>`;
   }
   return html`
   <div style=${{maxWidth:680}}>
     <input ref=${cFileRef} type="file" accept="image/*,application/pdf" onChange=${onCFile} style=${{display:'none'}}/>
-    <div onClick=${()=>cFileRef.current&&cFileRef.current.click()} style=${{padding:26,borderRadius:12,border:'1px dashed rgba(220,38,38,.4)',background:'rgba(220,38,38,.06)',textAlign:'center',cursor:'pointer'}}>
-      <div style=${{fontSize:15,fontWeight:800,color:'#DC2626'}}>${U.takePhoto}</div>
-      <div style=${{marginTop:4,fontSize:11.5,color:'#475569'}}>${U.billHint}</div>
+    <div onClick=${()=>cFileRef.current&&cFileRef.current.click()} style=${{padding:26,borderRadius:12,border:'1px dashed rgba(178,58,44,.4)',background:'rgba(178,58,44,.06)',textAlign:'center',cursor:'pointer'}}>
+      <div style=${{fontSize:15,fontWeight:800,color:'#B23A2C'}}>${U.takePhoto}</div>
+      <div style=${{marginTop:4,fontSize:11.5,color:'#6A5D4E'}}>${U.billHint}</div>
     </div>
-    ${cErr?html`<div style=${{marginTop:10,fontSize:12.5,color:'#DC2626',fontWeight:600}}>${cErr}</div>`:null}
-    <div style=${{margin:'18px 0 10px',fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:'#64748B'}}>${U.orDemo}</div>
+    ${cErr?html`<div style=${{marginTop:10,fontSize:12.5,color:'#B23A2C',fontWeight:600}}>${cErr}</div>`:null}
+    <div style=${{margin:'18px 0 10px',fontSize:10.5,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',color:'#8B7E6E'}}>${U.orDemo}</div>
     <div style=${{display:'flex',flexDirection:'column',gap:9}}>
       ${CRISIS_CASES.map((c,i)=>html`
-        <button key=${i} onClick=${()=>run(c.key)} style=${{display:'flex',alignItems:'center',gap:13,width:'100%',textAlign:'left',cursor:'pointer',padding:14,borderRadius:8,border:'1px solid #E5E7EB',background:'#FFF',color:'#0F172A'}}>
-          <span style=${{flex:'none',width:48,height:48,borderRadius:8,border:'1px solid #E5E7EB',background:'repeating-linear-gradient(135deg,rgba(15,23,42,.07) 0 6px,rgba(15,23,42,.02) 6px 12px)',font:'600 6.5px/1.2 ui-monospace,monospace',color:'#475569',display:'flex',alignItems:'center',justifyContent:'center',textAlign:'center',padding:3}}>photo</span>
+        <button key=${i} onClick=${()=>run(c.key)} style=${{display:'flex',alignItems:'center',gap:13,width:'100%',textAlign:'left',cursor:'pointer',padding:14,borderRadius:8,border:'1px solid #E5DAC7',background:'#FFFDF8',color:'#241E17'}}>
+          <span style=${{flex:'none',width:48,height:48,borderRadius:8,border:'1px solid #E5DAC7',background:'repeating-linear-gradient(135deg,rgba(90,60,30,.07) 0 6px,rgba(90,60,30,.02) 6px 12px)',font:'600 6.5px/1.2 ui-monospace,monospace',color:'#6A5D4E',display:'flex',alignItems:'center',justifyContent:'center',textAlign:'center',padding:3}}>photo</span>
           <span style=${{flex:1,fontSize:13.5,fontWeight:700,lineHeight:1.35}}>${U.crisisCases[c.key]||c.label}</span>
-          <span style=${{flex:'none',color:'#94A3B8'}}>›</span>
+          <span style=${{flex:'none',color:'#B0A290'}}>›</span>
         </button>`)}
     </div>
   </div>`;
@@ -925,7 +943,7 @@ function Crisis({ workerId, onCovered, lang='en' }) {
    SHELL
    ===================================================================== */
 const SIDEBAR = ['dashboard','alerts','income','submit','advance','savings','entitle'];
-const langPill = a => ({ bg:a?'#1F2A44':'transparent', fg:a?'#FFFFFF':'#475569' });
+const langPill = a => ({ bg:a?'#233150':'transparent', fg:a?'#FFFDF8':'#6A5D4E' });
 const ICON_PATHS = {
   dashboard: ['M3 10.5 12 3l9 7.5','M5 9.5V20h5v-5h4v5h5V9.5'],
   alerts: ['M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9','M13.7 21a2 2 0 0 1-3.4 0'],
@@ -958,48 +976,48 @@ function Login({ workers, onLogin, lang, setLang }) {
   const fill = (w) => { setPhone(w.phone); setPass(DEMO_PASS); setErr(''); };
   const field = (label, value, set, type, ph) => html`
     <label style=${{display:'block'}}>
-      <span style=${{display:'block',fontSize:11.5,fontWeight:700,color:'#475569',marginBottom:6}}>${label}</span>
+      <span style=${{display:'block',fontSize:11.5,fontWeight:700,color:'#6A5D4E',marginBottom:6}}>${label}</span>
       <input value=${value} onInput=${e=>set(e.target.value)} type=${type} placeholder=${ph} autoComplete="off"
-        style=${{width:'100%',boxSizing:'border-box',padding:'12px 14px',borderRadius:11,border:'1px solid #E2E8F0',background:'#F8FAFC',font:'500 14px inherit',color:'#0F172A',outline:'none'}}/>
+        style=${{width:'100%',boxSizing:'border-box',padding:'12px 14px',borderRadius:11,border:'1px solid #E3D8C6',background:'#FBF6EC',font:'500 14px inherit',color:'#241E17',outline:'none'}}/>
     </label>`;
   return html`
-  <div style=${{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#F1F5F9'}}>
+  <div style=${{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#F3EDE1'}}>
     <header style=${{display:'flex',alignItems:'center',gap:16,padding:'16px 28px'}}>
       <div style=${{display:'flex',alignItems:'center',gap:10}}>
-        <span style=${{width:32,height:32,borderRadius:9,background:'#3E92CC',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:800,fontSize:15}}>S</span>
-        <span style=${{fontSize:16,fontWeight:800,letterSpacing:'-.01em'}}>Sthir <span style=${{fontWeight:600,color:'#64748B'}}>· Worker portal</span></span>
+        <span style=${{width:32,height:32,borderRadius:9,background:'#2E5A87',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:800,fontSize:15}}>S</span>
+        <span style=${{fontSize:16,fontWeight:800,letterSpacing:'-.01em'}}>Sthir <span style=${{fontWeight:600,color:'#8B7E6E'}}>· Worker portal</span></span>
       </div>
       <span style=${{flex:1}}></span>
-      <div style=${{display:'flex',gap:4,padding:4,borderRadius:999,background:'rgba(15,23,42,.05)',border:'1px solid #E5E7EB'}}>
+      <div style=${{display:'flex',gap:4,padding:4,borderRadius:999,background:'rgba(90,60,30,.05)',border:'1px solid #E5DAC7'}}>
         ${[['en','English'],['ta','தமிழ்'],['hi','हिन्दी']].map(([k,lbl])=>{ const p=langPill(lang===k); return html`<button key=${k} onClick=${()=>setLang(k)} style=${{border:0,cursor:'pointer',padding:'5px 12px',borderRadius:999,fontWeight:600,fontSize:12,background:p.bg,color:p.fg}}>${lbl}</button>`; })}
       </div>
     </header>
     <div style=${{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'32px 24px',animation:'sthirRise .35s ease both'}}>
       <div style=${{width:'100%',maxWidth:400}}>
         <div style=${{textAlign:'center',marginBottom:24}}>
-          <div style=${{fontSize:26,fontWeight:800,letterSpacing:'-.02em'}}>Sign in to your dashboard</div>
-          <div style=${{marginTop:8,fontSize:13.5,color:'#64748B'}}>Access your resilience dashboard, alerts and bills.</div>
+          <div style=${{fontFamily:"'Fraunces',Georgia,serif",fontSize:28,fontWeight:600,letterSpacing:'-.01em'}}>Sign in to your dashboard</div>
+          <div style=${{marginTop:8,fontSize:13.5,color:'#8B7E6E'}}>Access your resilience dashboard, alerts and bills.</div>
         </div>
-        <form onSubmit=${submit} style=${{padding:26,borderRadius:18,border:'1px solid #EEF2F6',background:'#FFFFFF',boxShadow:'0 1px 2px rgba(15,23,42,.04), 0 14px 34px -22px rgba(15,23,42,.4)',display:'flex',flexDirection:'column',gap:16}}>
+        <form onSubmit=${submit} style=${{padding:26,borderRadius:18,border:'1px solid #EBE3D3',background:'#FFFDF8',boxShadow:'0 1px 2px rgba(90,60,30,.04), 0 14px 34px -22px rgba(90,60,30,.4)',display:'flex',flexDirection:'column',gap:16}}>
           ${field('Phone number', phone, setPhone, 'text', '+91 98765 43210')}
           ${field('Password', pass, setPass, 'password', '••••••••')}
-          ${err?html`<div style=${{fontSize:12.5,color:'#DC2626',fontWeight:600}}>${err}</div>`:null}
-          <button type="submit" style=${{cursor:'pointer',padding:14,borderRadius:11,border:0,background:'#1F2A44',color:'#FFFFFF',font:'700 14px inherit'}}>Sign in</button>
+          ${err?html`<div style=${{fontSize:12.5,color:'#B23A2C',fontWeight:600}}>${err}</div>`:null}
+          <button type="submit" style=${{cursor:'pointer',padding:14,borderRadius:11,border:0,background:'#233150',color:'#FFFDF8',font:'700 14px inherit'}}>Sign in</button>
         </form>
-        <div style=${{marginTop:18,padding:16,borderRadius:14,border:'1px dashed rgba(15,23,42,.16)',background:'#FFFFFF'}}>
-          <div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#64748B'}}>Demo logins · tap to fill</div>
+        <div style=${{marginTop:18,padding:16,borderRadius:14,border:'1px dashed rgba(90,60,30,.16)',background:'#FFFDF8'}}>
+          <div style=${{fontSize:10.5,fontWeight:800,letterSpacing:'.1em',textTransform:'uppercase',color:'#8B7E6E'}}>Demo logins · tap to fill</div>
           <div style=${{marginTop:10,display:'flex',flexDirection:'column',gap:7}}>
             ${(workers||[]).map(w=>html`
-              <button key=${w.id} type="button" onClick=${()=>fill(w)} style=${{display:'flex',alignItems:'center',gap:10,cursor:'pointer',padding:'8px 10px',borderRadius:10,border:'1px solid #EEF2F6',background:'#F8FAFC',textAlign:'left',color:'#0F172A',font:'inherit'}}>
+              <button key=${w.id} type="button" onClick=${()=>fill(w)} style=${{display:'flex',alignItems:'center',gap:10,cursor:'pointer',padding:'8px 10px',borderRadius:10,border:'1px solid #EBE3D3',background:'#FBF6EC',textAlign:'left',color:'#241E17',font:'inherit'}}>
                 <span style=${{flex:'none',width:30,height:30,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',background:bandOf(w.resilience_band).tint,color:bandOf(w.resilience_band).color,fontSize:12,fontWeight:800}}>${(w.name||'?').slice(0,1)}</span>
-                <span style=${{flex:1,minWidth:0}}><span style=${{display:'block',fontSize:12.5,fontWeight:700}}>${w.name}</span><span style=${{display:'block',fontSize:11,color:'#64748B'}}>${w.phone}</span></span>
-                <span style=${{flex:'none',fontSize:11,color:'#94A3B8'}}>${w.occupation}</span>
+                <span style=${{flex:1,minWidth:0}}><span style=${{display:'block',fontSize:12.5,fontWeight:700}}>${w.name}</span><span style=${{display:'block',fontSize:11,color:'#8B7E6E'}}>${w.phone}</span></span>
+                <span style=${{flex:'none',fontSize:11,color:'#B0A290'}}>${w.occupation}</span>
               </button>`)}
-            ${!workers?html`<div style=${{fontSize:12,color:'#94A3B8'}}>Loading accounts…</div>`:null}
+            ${!workers?html`<div style=${{fontSize:12,color:'#B0A290'}}>Loading accounts…</div>`:null}
           </div>
-          <div style=${{marginTop:10,fontSize:11,color:'#94A3B8'}}>Password for every demo account: <strong style=${{color:'#475569',fontFamily:'ui-monospace,monospace'}}>${DEMO_PASS}</strong></div>
+          <div style=${{marginTop:10,fontSize:11,color:'#B0A290'}}>Password for every demo account: <strong style=${{color:'#6A5D4E',fontFamily:'ui-monospace,monospace'}}>${DEMO_PASS}</strong></div>
         </div>
-        <div style=${{marginTop:18,textAlign:'center',fontSize:11,color:'#94A3B8'}}>Prototype · simulated funds. No real credentials are collected.</div>
+        <div style=${{marginTop:18,textAlign:'center',fontSize:11,color:'#B0A290'}}>Prototype · simulated funds. No real credentials are collected.</div>
       </div>
     </div>
   </div>`;
@@ -1048,19 +1066,19 @@ function App() {
   const b = worker ? bandOf(worker.resilience_band) : bandOf('building');
 
   const header = html`
-    <header style=${{position:'sticky',top:0,zIndex:30,display:'flex',alignItems:'center',gap:16,padding:'14px 28px',background:'#FFFFFF',borderBottom:'1px solid #EAEEF3'}}>
-      <a href="/" style=${{display:'flex',alignItems:'center',gap:10,textDecoration:'none',color:'#0F172A'}}>
-        <span style=${{width:32,height:32,borderRadius:8,background:'#3E92CC',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:800,fontSize:15}}>S</span>
-        <span style=${{fontSize:16,fontWeight:800,letterSpacing:'-.01em'}}>Sthir <span style=${{fontWeight:600,color:'#64748B'}}>· Worker portal</span></span>
+    <header style=${{position:'sticky',top:0,zIndex:30,display:'flex',alignItems:'center',gap:16,padding:'14px 28px',background:'#FFFDF8',borderBottom:'1px solid #E7DECE'}}>
+      <a href="/" style=${{display:'flex',alignItems:'center',gap:10,textDecoration:'none',color:'#241E17'}}>
+        <span style=${{width:32,height:32,borderRadius:8,background:'#2E5A87',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:800,fontSize:15}}>S</span>
+        <span style=${{fontSize:16,fontWeight:800,letterSpacing:'-.01em'}}>Sthir <span style=${{fontWeight:600,color:'#8B7E6E'}}>· Worker portal</span></span>
       </a>
       <span style=${{flex:1}}></span>
-      <span style=${{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:999,background:'rgba(217,119,6,.1)',border:'1px solid rgba(217,119,6,.32)',fontSize:10,fontWeight:700,color:'#b45309'}}>
-        <span style=${{width:5,height:5,borderRadius:'50%',background:'#d97706',animation:'sthirPulse 2.4s infinite'}}></span>${t.demoChip}
+      <span style=${{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:999,background:'rgba(169,114,30,.1)',border:'1px solid rgba(169,114,30,.32)',fontSize:10,fontWeight:700,color:'#A9721E'}}>
+        <span style=${{width:5,height:5,borderRadius:'50%',background:'#C08A2E',animation:'sthirPulse 2.4s infinite'}}></span>${t.demoChip}
       </span>
-      <div style=${{display:'flex',gap:4,padding:4,borderRadius:999,background:'rgba(15,23,42,.05)',border:'1px solid #E5E7EB'}}>
+      <div style=${{display:'flex',gap:4,padding:4,borderRadius:999,background:'rgba(90,60,30,.05)',border:'1px solid #E5DAC7'}}>
         ${[['en','English'],['ta','தமிழ்'],['hi','हिन्दी']].map(([k,lbl])=>{ const p=langPill(lang===k); return html`<button key=${k} onClick=${()=>setLang(k)} style=${{border:0,cursor:'pointer',padding:'5px 12px',borderRadius:999,fontWeight:600,fontSize:12,background:p.bg,color:p.fg}}>${lbl}</button>`; })}
       </div>
-      <button onClick=${resetDemo} title="Reset demo" style=${{border:'1px solid #D1D5DB',background:'#FFF',color:'#64748B',cursor:'pointer',padding:'6px 11px',borderRadius:999,fontWeight:600,fontSize:12}}>↺</button>
+      <button onClick=${resetDemo} title="Reset demo" style=${{border:'1px solid #D8CCB8',background:'#FFFDF8',color:'#8B7E6E',cursor:'pointer',padding:'6px 11px',borderRadius:999,fontWeight:600,fontSize:12}}>↺</button>
     </header>`;
 
   if (!workerId) {
@@ -1081,34 +1099,34 @@ function App() {
   const titleKey = screen;
 
   return html`
-  <div style=${{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#F1F5F9'}}>
+  <div style=${{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#F3EDE1'}}>
     ${header}
     <div style=${{flex:1,display:'flex',alignItems:'stretch',maxWidth:1360,width:'100%',margin:'0 auto'}}>
-      <aside style=${{flex:'none',width:252,padding:'20px 14px',display:'flex',flexDirection:'column',gap:5,background:'#FFFFFF',borderRight:'1px solid #EAEEF3'}}>
-        <div style=${{padding:14,borderRadius:14,background:'#F1F5F9',marginBottom:12}}>
+      <aside style=${{flex:'none',width:252,padding:'20px 14px',display:'flex',flexDirection:'column',gap:5,background:'#FFFDF8',borderRight:'1px solid #E7DECE'}}>
+        <div style=${{padding:14,borderRadius:14,background:'#F3EDE1',marginBottom:12}}>
           <div style=${{display:'flex',alignItems:'center',gap:12}}>
             <div style=${{width:44,height:44,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:b.tint,fontSize:17,fontWeight:800,color:b.color,fontVariantNumeric:'tabular-nums'}}>${worker?worker.resilience_score:''}</div>
             <div style=${{minWidth:0}}>
               <div style=${{fontSize:14,fontWeight:800,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>${worker?worker.name:''}</div>
-              <div style=${{fontSize:11,color:'#64748B'}}>${worker?trMap((I18N[lang]||I18N.en).occ, worker.occupation):''}</div>
+              <div style=${{fontSize:11,color:'#8B7E6E'}}>${worker?trMap((I18N[lang]||I18N.en).occ, worker.occupation):''}</div>
             </div>
           </div>
-          <button onClick=${reset} style=${{marginTop:12,width:'100%',cursor:'pointer',padding:8,borderRadius:9,border:'1px solid #E2E8F0',background:'#FFFFFF',color:'#475569',font:'600 11.5px inherit'}}>${t.signOut} <span style=${{marginLeft:4}}>⏻</span></button>
+          <button onClick=${reset} style=${{marginTop:12,width:'100%',cursor:'pointer',padding:8,borderRadius:9,border:'1px solid #E3D8C6',background:'#FFFDF8',color:'#6A5D4E',font:'600 11.5px inherit'}}>${t.signOut} <span style=${{marginLeft:4}}>⏻</span></button>
         </div>
         ${nav.map(n=>html`
-          <button key=${n.key} onClick=${()=>go(n.key)} style=${{display:'flex',alignItems:'center',gap:11,width:'100%',textAlign:'left',cursor:'pointer',padding:'10px 13px',border:0,borderRadius:11,background:n.active?'#1F2A44':'transparent',color:n.active?'#FFFFFF':'#64748B',font:(n.active?700:600)+' 13.5px/1.2 inherit'}}>
-            <${Icon} name=${n.key} color=${n.active?'#5BA4CF':'#94A3B8'}/>
+          <button key=${n.key} onClick=${()=>go(n.key)} style=${{display:'flex',alignItems:'center',gap:11,width:'100%',textAlign:'left',cursor:'pointer',padding:'10px 13px',border:0,borderRadius:11,background:n.active?'#233150':'transparent',color:n.active?'#FFFDF8':'#8B7E6E',font:(n.active?700:600)+' 13.5px/1.2 inherit'}}>
+            <${Icon} name=${n.key} color=${n.active?'#5C83B6':'#B0A290'}/>
             <span style=${{flex:1}}>${n.label}</span>
-            ${n.badge?html`<span style=${{flex:'none',minWidth:18,textAlign:'center',padding:'2px 6px',borderRadius:999,background:n.active?'rgba(255,255,255,.16)':'rgba(220,38,38,.12)',color:n.active?'#FFFFFF':'#DC2626',font:'700 10.5px inherit'}}>${n.badge}</span>`:null}
+            ${n.badge?html`<span style=${{flex:'none',minWidth:18,textAlign:'center',padding:'2px 6px',borderRadius:999,background:n.active?'rgba(255,255,255,.16)':'rgba(178,58,44,.12)',color:n.active?'#FFFDF8':'#B23A2C',font:'700 10.5px inherit'}}>${n.badge}</span>`:null}
           </button>`)}
         <span style=${{flex:1}}></span>
-        <button onClick=${()=>go('crisis')} style=${{display:'flex',alignItems:'center',justifyContent:'center',gap:9,cursor:'pointer',padding:14,borderRadius:12,border:'1.5px solid '+(screen==='crisis'?'#DC2626':'#FECACA'),background:screen==='crisis'?'#DC2626':'#FEF2F2',color:screen==='crisis'?'#FFF':'#DC2626',font:'800 13.5px/1.2 inherit'}}>
-          <${Icon} name="crisis" color=${screen==='crisis'?'#FFFFFF':'#DC2626'}/>${t.nav.crisis}</button>
+        <button onClick=${()=>go('crisis')} style=${{display:'flex',alignItems:'center',justifyContent:'center',gap:9,cursor:'pointer',padding:14,borderRadius:12,border:'1.5px solid '+(screen==='crisis'?'#B23A2C':'#EAC9B8'),background:screen==='crisis'?'#B23A2C':'#FBEDE6',color:screen==='crisis'?'#FFFDF8':'#B23A2C',font:'800 13.5px/1.2 inherit'}}>
+          <${Icon} name="crisis" color=${screen==='crisis'?'#FFFDF8':'#B23A2C'}/>${t.nav.crisis}</button>
       </aside>
       <main style=${{flex:1,minWidth:0,padding:'24px 28px 48px 16px',animation:'sthirRise .3s ease both'}}>
         <div style=${{padding:'2px 4px 18px'}}>
           <div style=${{fontSize:24,fontWeight:800,letterSpacing:'-.02em'}}>${t.nav[titleKey]}</div>
-          <div style=${{marginTop:4,fontSize:13,color:'#475569'}}>${t.subs[titleKey]}</div>
+          <div style=${{marginTop:4,fontSize:13,color:'#6A5D4E'}}>${t.subs[titleKey]}</div>
         </div>
         ${scr}
       </main>

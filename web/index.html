@@ -6,20 +6,20 @@
 <title>Sthir</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: light; }
-  body { margin:0; min-height:100vh; background:#F7F9FA; font-family:'Inter',system-ui,sans-serif; color:#0F172A; display:flex; flex-direction:column; }
+  body { margin:0; min-height:100vh; background:#F3EDE1; font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:#241E17; display:flex; flex-direction:column; }
   a { text-decoration:none; color:inherit; }
   .wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; }
   .logo { display:flex; align-items:center; gap:12px; }
-  .mark { width:44px; height:44px; border-radius:11px; background:#0F766E; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:22px; }
+  .mark { width:44px; height:44px; border-radius:11px; background:#2E5A87; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:22px; }
   .cards { margin-top:44px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; width:100%; max-width:760px; }
-  .card { padding:28px; border-radius:16px; border:1px solid #E5E7EB; background:#fff; transition:transform .15s, border-color .15s, box-shadow .15s; }
-  .card:hover { transform:translateY(-3px); border-color:rgba(15,118,110,.45); box-shadow:0 18px 40px -28px rgba(15,23,42,.4); }
+  .card { padding:28px; border-radius:16px; border:1px solid #E5DAC7; background:#fff; transition:transform .15s, border-color .15s, box-shadow .15s; }
+  .card:hover { transform:translateY(-3px); border-color:rgba(46,90,135,.45); box-shadow:0 18px 40px -28px rgba(15,23,42,.4); }
   .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.04em; }
-  .foot { padding:20px; text-align:center; font-size:11.5px; color:#64748B; }
-  .chip { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(217,119,6,.1); border:1px solid rgba(217,119,6,.32); font-size:11px; font-weight:700; color:#b45309; }
+  .foot { padding:20px; text-align:center; font-size:11.5px; color:#8B7E6E; }
+  .chip { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(169,114,30,.1); border:1px solid rgba(169,114,30,.32); font-size:11px; font-weight:700; color:#A9721E; }
   @keyframes pulse { 0%,100%{opacity:.5;} 50%{opacity:1;} }
 </style>
 </head>
@@ -27,25 +27,25 @@
 <div class="wrap">
   <div class="logo">
     <span class="mark">S</span>
-    <span style="font-size:30px;font-weight:800;letter-spacing:-.03em">Sthir</span>
+    <span style="font-size:32px;font-weight:600;letter-spacing:-.01em;font-family:'Fraunces',Georgia,serif">Sthir</span>
   </div>
-  <div style="margin-top:14px;max-width:520px;text-align:center;font-size:15px;line-height:1.6;color:#334155">
+  <div style="margin-top:14px;max-width:520px;text-align:center;font-size:15px;line-height:1.6;color:#4A4034">
     Financial resilience for gig &amp; informal workers — verify income, score resilience, warn before a crisis, and reach free government cover before any loan.
   </div>
-  <div style="margin-top:20px" class="chip"><span style="width:6px;height:6px;border-radius:50%;background:#d97706;animation:pulse 2.4s infinite"></span>Prototype · simulated funds</div>
+  <div style="margin-top:20px" class="chip"><span style="width:6px;height:6px;border-radius:50%;background:#C08A2E;animation:pulse 2.4s infinite"></span>Prototype · simulated funds</div>
 
   <div class="cards">
     <a class="card" href="/worker.html">
-      <span class="badge" style="background:rgba(15,118,110,.1);color:#0f766e">Worker portal</span>
+      <span class="badge" style="background:rgba(46,90,135,.1);color:#2E5A87">Worker portal</span>
       <div style="margin-top:16px;font-size:20px;font-weight:800;letter-spacing:-.02em">For the worker</div>
-      <div style="margin-top:8px;font-size:13.5px;line-height:1.6;color:#475569">Resilience dashboard, early warnings, submit income, responsible advances, savings, crisis override and free government cover. English · தமிழ் · हिन्दी.</div>
-      <div style="margin-top:18px;font-size:13px;font-weight:700;color:#0f766e">Open worker portal →</div>
+      <div style="margin-top:8px;font-size:13.5px;line-height:1.6;color:#6A5D4E">Resilience dashboard, early warnings, submit income, responsible advances, savings, crisis override and free government cover. English · தமிழ் · हिन्दी.</div>
+      <div style="margin-top:18px;font-size:13px;font-weight:700;color:#2E5A87">Open worker portal →</div>
     </a>
     <a class="card" href="/lender.html">
-      <span class="badge" style="background:rgba(21,128,61,.1);color:#15803d">Lender console</span>
+      <span class="badge" style="background:rgba(62,124,79,.1);color:#3E7C4F">Lender console</span>
       <div style="margin-top:16px;font-size:20px;font-weight:800;letter-spacing:-.02em">For the lender</div>
-      <div style="margin-top:8px;font-size:13.5px;line-height:1.6;color:#475569">Portfolio health, distress triage, source reliability, verification &amp; fraud, statutory exposure and a live event stream. Light &amp; dark.</div>
-      <div style="margin-top:18px;font-size:13px;font-weight:700;color:#15803d">Open lender console →</div>
+      <div style="margin-top:8px;font-size:13.5px;line-height:1.6;color:#6A5D4E">Portfolio health, distress triage, source reliability, verification &amp; fraud, statutory exposure and a live event stream. Light &amp; dark.</div>
+      <div style="margin-top:18px;font-size:13px;font-weight:700;color:#3E7C4F">Open lender console →</div>
     </a>
   </div>
 </div>
