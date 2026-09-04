@@ -184,7 +184,7 @@ async def submit_income(worker_id: str, file: UploadFile = File(...),
                      payload={"reason": "not_income_document", "backend": backend}))
         db.commit()
         return {
-            "rejected": True,
+            "rejected": True, "reason_code": "not_income",
             "backend": backend,
             "document_type": extraction.document_type,
             "confidence": extraction.overall_confidence,
@@ -192,6 +192,26 @@ async def submit_income(worker_id: str, file: UploadFile = File(...),
                        "(invoice, payout screenshot, receipt or payslip). "
                        "Please upload a valid income document."),
         }
+
+    # Cross-verify the CLAIMED amount against the amount the model read off the
+    # proof. If the worker types a figure the document does not support, reject
+    # it - the proof is the source of truth, not the typed number.
+    read = getattr(extraction, "total_amount", None) if extraction else None
+    if (read is not None and read > 0 and backend in ("gemini", "claude")):
+        rel = abs(gross - read) / max(read, gross)
+        if rel > 0.12 and abs(gross - read) > 50:
+            dest.unlink(missing_ok=True)
+            db.add(Event(type="income.rejected", subject_id=worker_id,
+                         payload={"reason": "amount_mismatch", "claimed": gross,
+                                  "document_amount": read, "backend": backend}))
+            db.commit()
+            return {
+                "rejected": True, "reason_code": "amount_mismatch",
+                "backend": backend, "claimed": gross, "document_amount": read,
+                "reason": (f"The amount you entered (Rs {gross:,.0f}) does not "
+                           f"match the amount on the document (Rs {read:,.0f}). "
+                           f"Enter the amount shown on the proof."),
+            }
 
     try:
         ph = phash.combined(dest)
